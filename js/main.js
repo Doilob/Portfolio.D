@@ -1,4 +1,8 @@
-// 1. 날짜 동적 표시
+// 🔑 GitHub Gist 설정값
+const GIST_ID = "d584cff9f66dc32942cef6c3389befd2";
+const GITHUB_TOKEN = "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"; // ghp_...
+
+// 1. 헤더/푸터 날짜 동적 표시
 function updateDate() {
   const now = new Date();
   const options = { year: 'numeric', month: 'short', day: '2-digit' };
@@ -12,7 +16,7 @@ function updateDate() {
 }
 updateDate();
 
-// 2. 유튜브 추천 플레이리스트 (48시간 주기 갱신)
+// 2. 플레이리스트 로테이션 (48시간 주기)
 const samplePlaylist = [
   { title: "Lofi Beats for Focus", artist: "ChillHop" },
   { title: "Jazz Background Melodies", artist: "Blue Note Radio" },
@@ -30,7 +34,7 @@ function loadRandomTrack() {
 }
 loadRandomTrack();
 
-// 3. 전역 데이터 및 백업 데이터
+// 3. 전역 변수 및 기본 백업 데이터
 let globalProjects = [];
 
 const defaultProjects = [
@@ -54,7 +58,7 @@ function renderProjects(projects) {
   container.innerHTML = '';
 
   if (!projects || projects.length === 0) {
-    container.innerHTML = '<p style="text-align:center; padding:20px; font-style:italic; font-family:Georgia, serif;">No projects found in the archive.</p>';
+    container.innerHTML = '<p style="text-align:center; padding:20px; font-style:italic;">No projects found in the archive.</p>';
     return;
   }
 
@@ -64,15 +68,10 @@ function renderProjects(projects) {
     if (proj.badgeTag === 'EDITORIAL') badgeClass = 'badge-editorial';
     if (proj.badgeTag === 'new') badgeClass = 'badge-branding';
 
-    // 상태별 라운드 배지 색상 동적 설정
-    let statusBgColor = '#c84b29'; // 기본 IN PROGRESS (주황빛)
+    let statusBgColor = '#c84b29';
     const statusText = (proj.status || 'IN PROGRESS').trim().toUpperCase();
-    
-    if (statusText === 'COMPLETED') {
-      statusBgColor = '#2d6a4f';   // COMPLETED (초록빛)
-    } else if (statusText === 'DROPPED') {
-      statusBgColor = '#6c757d';   // DROPPED (회색빛)
-    }
+    if (statusText === 'COMPLETED') statusBgColor = '#2d6a4f';
+    if (statusText === 'DROPPED') statusBgColor = '#6c757d';
 
     const articleHTML = `
       <article class="project-card">
@@ -103,7 +102,7 @@ function renderProjects(projects) {
   });
 }
 
-// 5. 필터 및 정렬 로직
+// 5. 검색, 필터, 정렬 함수
 function filterAndSortProjects() {
   const tagEl = document.getElementById('filter-tag');
   const keywordEl = document.getElementById('filter-keyword');
@@ -124,46 +123,39 @@ function filterAndSortProjects() {
   filtered.sort((a, b) => {
     const dateA = new Date(a.date || 0);
     const dateB = new Date(b.date || 0);
-    if (sortOrder === 'latest') {
-      return dateB - dateA;
-    } else {
-      return dateA - dateB;
-    }
+    return sortOrder === 'latest' ? dateB - dateA : dateA - dateB;
   });
 
   renderProjects(filtered);
 }
 
-// 6. 이벤트 리스너 연결
 document.getElementById('filter-tag')?.addEventListener('change', filterAndSortProjects);
 document.getElementById('filter-keyword')?.addEventListener('input', filterAndSortProjects);
 document.getElementById('sort-order')?.addEventListener('change', filterAndSortProjects);
 
-// 7. 데이터 로드 초기화 (JSON 실패 시 localStorage 또는 기본값 안전 로드)
+// 6. GitHub Gist API 데이터 불러오기
 function initProjects() {
-  fetch('projects.json')
+  fetch(`https://api.github.com/gists/${GIST_ID}`, {
+    headers: {
+      'Authorization': `token ${GITHUB_TOKEN}`,
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  })
     .then(res => {
-      if (!res.ok) throw new Error('Network response failed');
+      if (!res.ok) throw new Error('Gist fetch failed');
       return res.json();
     })
-    .then(data => {
-      globalProjects = data;
+    .then(gistData => {
+      const fileContent = gistData.files['projects.json']?.content;
+      globalProjects = fileContent ? JSON.parse(fileContent) : defaultProjects;
       filterAndSortProjects();
     })
-    .catch(() => {
+    .catch((err) => {
+      console.warn("Gist load failed, fallback to local storage:", err);
       const saved = localStorage.getItem('gazette_projects');
-      if (saved) {
-        try {
-          globalProjects = JSON.parse(saved);
-        } catch (e) {
-          globalProjects = defaultProjects;
-        }
-      } else {
-        globalProjects = defaultProjects;
-      }
+      globalProjects = saved ? JSON.parse(saved) : defaultProjects;
       filterAndSortProjects();
     });
 }
 
-// 실행
 initProjects();
