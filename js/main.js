@@ -82,7 +82,7 @@ function renderProjects(projects) {
             <h2>${proj.headline}</h2>
             <p class="author">${proj.author}</p>
             <p class="excerpt">${proj.summary}</p>
-            <a href="#" class="read-more">Continue reading &rarr;</a>
+            <a href="detail.html?id=${proj.id}" class="read-more">Continue reading &rarr;</a>
           </div>
         </div>
       </article>
