@@ -1,0 +1,46 @@
+[
+  {
+    "id": "proj-1790333165146",
+    "title": "김세현의 취업",
+    "status": "IN PROGRESS",
+    "badgeTag": "new",
+    "headline": "와 김세현 뒤집어 놓았다",
+    "author": "by Sehyun, Kim / 2026.09.25 ~",
+    "date": "Sep 25, 2026",
+    "image": "project.jpg",
+    "summary": "요호"
+  },
+  {
+    "id": "proj-1",
+    "title": "Project 1: Redesigning a Global Brand",
+    "status": "IN PROGRESS",
+    "headline": "Revolutionizing Visual Identity",
+    "author": "by Sarah Jenkins",
+    "date": "May, 2024 • Sep. 12, 2026",
+    "badgeTag": "BRANDING",
+    "image": "project1.jpg",
+    "summary": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+  },
+  {
+    "id": "proj-2",
+    "title": "Project 2: Digital Editorial Platform",
+    "status": "DROPPED",
+    "headline": "Curating Stories for the Modern Reader",
+    "author": "by Sarah Jenkins",
+    "date": "Jan. 13, 2024",
+    "badgeTag": "EDITORIAL",
+    "image": "project2.jpg",
+    "summary": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+  },
+  {
+    "id": "proj-3",
+    "title": "Project 3: Interactive Web Experience",
+    "status": "COMPLETED",
+    "headline": "Engaging Users Through Immersive Design",
+    "author": "by Sarah Jenkins",
+    "date": "May, 2024 • Sat. 15, 2024",
+    "badgeTag": "WEB",
+    "image": "project3.jpg",
+    "summary": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+  }
+]
