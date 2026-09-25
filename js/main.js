@@ -51,7 +51,7 @@ const defaultProjects = [
   }
 ];
 
-// 4. 프로젝트 렌더링 함수
+// 4. 프로젝트 렌더링 함수 (지연 로딩 loading="lazy" 포함)
 function renderProjects(projects) {
   const container = document.getElementById('projects-container');
   if (!container) return;
@@ -82,7 +82,7 @@ function renderProjects(projects) {
         
         <div class="project-content">
           <div class="image-box">
-            <img src="${proj.image}" alt="${proj.headline}" style="width:100%; height:180px; object-fit:cover; margin-bottom:0.8rem; border-radius:4px; filter:sepia(10%);">
+            <img src="${proj.image}" alt="${proj.headline}" loading="lazy" style="width:100%; height:180px; object-fit:cover; margin-bottom:0.8rem; border-radius:4px; filter:sepia(10%);">
             <div class="sub-tags">
               <span class="badge" style="background-color: ${statusBgColor} !important; color: #fff;">${proj.status || 'IN PROGRESS'}</span>
               <p class="date-info">📅 ${proj.date}</p>
@@ -133,8 +133,20 @@ document.getElementById('filter-tag')?.addEventListener('change', filterAndSortP
 document.getElementById('filter-keyword')?.addEventListener('input', filterAndSortProjects);
 document.getElementById('sort-order')?.addEventListener('change', filterAndSortProjects);
 
-// 6. GitHub Gist API 데이터 불러오기
+// 6. 캐시 우선 렌더링 (Optimistic UI) & 백그라운드 Gist 동기화
 function initProjects() {
+  // Step 1: 로컬 스토리지 캐시 데이터가 있으면 0.1초 만에 즉시 화면 렌더링
+  const cachedData = localStorage.getItem('gazette_projects');
+  if (cachedData) {
+    try {
+      globalProjects = JSON.parse(cachedData);
+      filterAndSortProjects();
+    } catch (e) {
+      console.warn("Local cache parse error:", e);
+    }
+  }
+
+  // Step 2: 백그라운드에서 Gist 최신 데이터 동기화
   fetch(`https://api.github.com/gists/${GIST_ID}`, {
     headers: {
       'Authorization': `token ${GITHUB_TOKEN}`,
@@ -147,14 +159,21 @@ function initProjects() {
     })
     .then(gistData => {
       const fileContent = gistData.files['projects.json']?.content;
-      globalProjects = fileContent ? JSON.parse(fileContent) : defaultProjects;
-      filterAndSortProjects();
+      if (fileContent) {
+        // 최신 데이터를 로컬 스토리지 캐시에 업데이트
+        localStorage.setItem('gazette_projects', fileContent);
+        
+        // 데이터가 변경되었을 경우 화면 업데이트
+        globalProjects = JSON.parse(fileContent);
+        filterAndSortProjects();
+      }
     })
     .catch((err) => {
-      console.warn("Gist load failed, fallback to local storage:", err);
-      const saved = localStorage.getItem('gazette_projects');
-      globalProjects = saved ? JSON.parse(saved) : defaultProjects;
-      filterAndSortProjects();
+      console.warn("Background Gist sync failed (Using cached data):", err);
+      if (!cachedData) {
+        globalProjects = defaultProjects;
+        filterAndSortProjects();
+      }
     });
 }
 
