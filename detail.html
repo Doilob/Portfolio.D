@@ -1,36 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Project Detail - The Gazette</title>
+  <title>Article Detail - THE PORTFOLIO GAZETTE</title>
   <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
-  <header class="detail-header">
-    <a href="index.html" class="back-link">&larr; BACK TO ARCHIVE</a>
-  </header>
-
-  <main class="detail-main">
-    <article id="detail-container">
-      <div class="detail-meta">
-        <span id="detail-tag" class="badge badge-tag-default">TAG</span>
-        <span id="detail-status" class="badge badge-status-default">STATUS</span>
-        <span id="detail-date" class="meta-date">Date</span>
+  <div class="gazette-container">
+    <!-- 1. 신문식 스타일 상단 헤더 (Journalistic Header) -->
+    <header class="gazette-header">
+      <nav class="top-nav">
+        <a href="index.html" class="back-link">&larr; BACK TO FRONT PAGE ARCHIVE</a>
+      </nav>
+      <h1 class="main-title">THE PORTFOLIO GAZETTE</h1>
+      <div class="header-meta-bar">
+        <span>VOL. I ... NO. 12</span>
+        <span>SPECIAL FEATURE ARTICLE</span>
+        <span>GAZETTE EDITION</span>
       </div>
+    </header>
 
-      <h1 id="detail-headline" class="detail-headline">Loading...</h1>
-      <p id="detail-author" class="detail-author">by Author</p>
+    <main class="detail-main">
+      <article id="detail-container">
+        <!-- 메타 배지 정보 -->
+        <div class="detail-meta">
+          <span id="detail-tag" class="badge badge-tag-default">TAG</span>
+          <span id="detail-status" class="badge badge-status-default">STATUS</span>
+          <span id="detail-date" class="meta-date">Date</span>
+        </div>
 
-      <div class="detail-image-box">
-        <img id="detail-image" class="detail-image" src="" alt="Project Image">
-      </div>
+        <!-- 헤드라인 및 저자 -->
+        <h1 id="detail-headline" class="detail-headline">Loading Article...</h1>
+        <p id="detail-author" class="detail-author">by Author</p>
 
-      <div id="detail-summary" class="detail-summary">
-        Content loading...
-      </div>
-    </article>
-  </main>
+        <hr class="divider">
+
+        <!-- 메인 대표 이미지 -->
+        <div class="detail-image-box">
+          <img id="detail-image" class="detail-image" src="" alt="Project Image">
+        </div>
+
+        <!-- 2. 기사 본문 영역 (드롭캡 및 본문 서체 적용) -->
+        <div id="detail-summary" class="detail-summary">
+          Article content loading...
+        </div>
+      </article>
+
+      <!-- 3. 이전글 / 다음글 동적 네비게이션 (Gazette Navigation) -->
+      <nav class="article-nav-section">
+        <h3 class="nav-section-title">📰 GAZETTE NAVIGATION</h3>
+        <div class="article-nav-grid">
+          <div id="prev-article-box" class="nav-box">
+            <!-- js/detail.js 에서 이전글 동적 생성 -->
+          </div>
+          <div id="next-article-box" class="nav-box">
+            <!-- js/detail.js 에서 다음글 동적 생성 -->
+          </div>
+        </div>
+      </nav>
+
+      <!-- 4. 연관 프로젝트 추천 (More From Archive) -->
+      <section class="related-section">
+        <h3 class="related-section-title">🔍 MORE FROM THIS ARCHIVE</h3>
+        <div id="related-projects-grid" class="related-grid">
+          <!-- js/detail.js 에서 연관 아티클 동적 생성 -->
+        </div>
+      </section>
+    </main>
+
+    <footer class="gazette-footer">
+      <p>© THE PORTFOLIO GAZETTE — ALL RIGHTS RESERVED.</p>
+    </footer>
+  </div>
 
   <script src="js/detail.js"></script>
 </body>
