@@ -1,16 +1,249 @@
-<!DOCTYPE html> 
-<html lang="ko"> 
+<!DOCTYPE html>
+<html lang="ko">
 <head>
-  <meta charset="utf-8"> 
-  <link rel="stylesheet" href="styles\style.css"> 
-  <!-- homepage-icon -->
-  <link href="" type="image/x-icon" sizes="16x16"> 
-  <title>Anchor in Architecture</title> 
-</head> 
-<body> 
-    
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System Showcase</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Design System</h1>
+    </header>
+
+    <main class="grid-layout">
+      <!-- Buttons Card -->
+      <section class="card">
+        <h3>Buttons</h3>
+        <div class="component-group row">
+          <button class="btn btn-black">Button</button>
+          <button class="btn btn-outline">Button</button>
+          <button class="btn btn-icon"><i class="fa-solid fa-chevron-down"></i></button>
+          <button class="btn btn-icon"><i class="fa-solid fa-sliders"></i></button>
+        </div>
+        <div class="component-group row margin-top">
+          <button class="btn btn-beige">Button</button>
+          <button class="btn btn-beige-small">Button</button>
+          <button class="btn btn-black-small">Button</button>
+          <button class="btn btn-arrow"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </section>
+
+      <!-- Tags & Badges Card -->
+      <section class="card">
+        <h3>Tags & Badges</h3>
+        <div class="component-group row">
+          <span class="tag tag-orange">ALL</span>
+          <span class="tag tag-gray">MOODBOARD</span>
+          <span class="tag tag-gray">Ratings <i class="fa-solid fa-chevron-down"></i></span>
+        </div>
+        <div class="component-group row margin-top">
+          <span class="tag tag-clear">Clear All <i class="fa-solid fa-xmark"></i></span>
+          <span class="tag tag-outline">ART DECO</span>
+          <span class="tag tag-outline">HAVER</span>
+        </div>
+      </section>
+
+      <!-- Breadcrumbs Card -->
+      <section class="card">
+        <h3>Breadcrumbs</h3>
+        <nav class="breadcrumb">
+          <span>Home Page</span>
+          <span class="sep">/</span>
+          <span class="current">Case Study Details</span>
+        </nav>
+      </section>
+
+      <!-- Accordion Card -->
+      <section class="card">
+        <h3>Accordion</h3>
+        <details class="accordion">
+          <summary>What is Milray Park? <span class="icon">+</span></summary>
+          <p>Milray Park is an online interior design platform.</p>
+        </details>
+        <details class="accordion margin-top" open>
+          <summary>What makes Milray Park unique? <span class="icon">-</span></summary>
+          <p class="accordion-text">
+            On <span class="highlight">Milray Park</span>, you collaborate with your interior designer 100% online on our easy to use eDecorating platform.
+          </p>
+        </details>
+      </section>
+
+      <!-- Bullets Card -->
+      <section class="card">
+        <h3>Bullets</h3>
+        <div class="bullet-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Highly professional</span>
+        </div>
+      </section>
+
+      <!-- Spinners Card -->
+      <section class="card">
+        <h3>Spinners</h3>
+        <div class="component-group row align-center">
+          <div class="spinner spinner-circle"></div>
+          <div class="spinner spinner-ring"></div>
+        </div>
+      </section>
+
+      <!-- Checkboxes Card -->
+      <section class="card">
+        <h3>Checkboxes</h3>
+        <div class="checkbox-grid">
+          <label class="checkbox-label"><input type="checkbox" checked> <span>Checked</span></label>
+          <label class="checkbox-label disabled"><input type="checkbox" checked disabled> <span>Disabled Checked</span></label>
+          <label class="checkbox-label"><input type="checkbox"> <span>Unchecked</span></label>
+          <label class="checkbox-label disabled"><input type="checkbox" disabled> <span>Disabled Unchecked</span></label>
+        </div>
+      </section>
+
+      <!-- Radios Card -->
+      <section class="card">
+        <h3>Radios</h3>
+        <div class="radio-grid">
+          <label class="radio-label"><input type="radio" name="r1" checked> <span>Checked</span></label>
+          <label class="radio-label disabled"><input type="radio" name="r2" checked disabled> <span>Disabled Checked</span></label>
+          <label class="radio-label"><input type="radio" name="r1"> <span>Unchecked</span></label>
+          <label class="radio-label disabled"><input type="radio" name="r2" disabled> <span>Disabled Unchecked</span></label>
+        </div>
+      </section>
+
+      <!-- Text Inputs Card -->
+      <section class="card span-2">
+        <h3>Text Inputs</h3>
+        <div class="input-container margin-bottom">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" placeholder="Search for Desktops" class="input-field">
+          <button class="input-dropdown-btn">Budget <i class="fa-solid fa-chevron-down"></i></button>
+        </div>
+        <div class="input-container margin-bottom">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" placeholder="Search for Mobiles" class="input-field">
+          <button class="input-filter-btn"><i class="fa-solid fa-sliders"></i></button>
+        </div>
+        <div class="input-row">
+          <div class="select-box">
+            <select>
+              <option>What is your inquiry about?</option>
+            </select>
+          </div>
+          <div class="input-box">
+            <input type="text" placeholder="Name">
+          </div>
+        </div>
+      </section>
+
+      <!-- Info Blocks Card -->
+      <section class="card">
+        <h3>Info blocks</h3>
+        <div class="info-block">
+          <i class="fa-solid fa-circle-check info-icon"></i>
+          <p>
+            <strong>Like a particular brand?</strong> Just let your designer know. Otherwise, you can leave it up to your designer who will be sourcing the best pieces at the best prices for your overall look.
+          </p>
+        </div>
+      </section>
+
+      <!-- Sliders Card -->
+      <section class="card">
+        <h3>Sliders</h3>
+        <div class="slider-container">
+          <div class="slider-track">
+            <div class="slider-fill" style="width: 75%;"></div>
+            <div class="slider-thumb" style="left: 75%;">
+              <span class="tooltip">Value</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Payments Card -->
+      <section class="card">
+        <h3>Payments</h3>
+        <div class="payment-icons">
+          <span class="pay-tag visa">VISA</span>
+          <span class="pay-tag master"><i class="fa-brands fa-cc-mastercard"></i></span>
+          <span class="pay-tag stripe"><i class="fa-brands fa-stripe"></i></span>
+          <span class="pay-tag apple"><i class="fa-brands fa-apple"></i></span>
+          <span class="pay-tag gpay"><i class="fa-brands fa-google"></i></span>
+          <span class="pay-tag jcb">JCB</span>
+          <span class="pay-tag union">Union</span>
+        </div>
+      </section>
+
+      <!-- Flags Card -->
+      <section class="card">
+        <h3>Flags</h3>
+        <div class="flags-row">
+          <span class="flag">🇦🇺</span>
+          <span class="flag">🇺🇸</span>
+          <span class="flag">🇬🇧</span>
+          <span class="flag">🇨🇦</span>
+          <span class="flag">🇯🇵</span>
+          <span class="flag">🇫🇷</span>
+          <span class="flag">🇩🇪</span>
+          <span class="flag">🇮🇹</span>
+          <span class="flag">🇪🇸</span>
+          <span class="flag">🇧🇷</span>
+          <span class="flag">🇪🇺</span>
+        </div>
+      </section>
+
+      <!-- Cells Card -->
+      <section class="card">
+        <h3>Cells</h3>
+        <div class="promo-cell margin-bottom">
+          <div class="cell-left">
+            <i class="fa-solid fa-ticket cell-icon"></i>
+            <div>
+              <div class="cell-title">T&Cs Bday Promotion</div>
+              <div class="cell-sub">NOVEMBER 2018</div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right arrow"></i>
+        </div>
+        <div class="user-cell">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Jane" class="user-avatar">
+          <div class="user-info">
+            <div class="user-name">Jane Cooper</div>
+            <div class="user-rating">★★★★★</div>
+            <div class="user-location">Sydney • Available now</div>
+          </div>
+          <div class="user-price">$599</div>
+        </div>
+      </section>
+
+      <!-- Segmented Controls Card -->
+      <section class="card">
+        <h3>Segmented Controls</h3>
+        <div class="segmented-control margin-bottom">
+          <button class="segment-btn active"><i class="fa-solid fa-border-all"></i></button>
+          <button class="segment-btn"><i class="fa-solid fa-list"></i></button>
+        </div>
+        <div class="segmented-control text-control">
+          <button class="segment-btn active">Label</button>
+          <button class="segment-btn">Label</button>
+          <button class="segment-btn">Label</button>
+        </div>
+      </section>
+
+      <!-- Profile Image Card -->
+      <section class="card flex-center">
+        <h3>Profile image</h3>
+        <div class="profile-avatar-wrapper">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Profile" class="profile-img">
+          <span class="profile-badge">GOLD</span>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <button class="btn btn-beige-large">And more...</button>
+    </footer>
+  </div>
 </body>
-<footer>
-    
-  </footer>
 </html>
