@@ -255,3 +255,50 @@ body {
         padding-top: 2rem;
     }
 }
+/* 🔍 신문 인덱스 스타일 필터 및 검색 바 */
+.gazette-filter-bar {
+    border-top: 2px solid #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    padding: 0.8rem 1rem;
+    margin-bottom: 2rem;
+    background-color: #f2efe9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.filter-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1rem;
+    text-transform: uppercase;
+    font-family: sans-serif;
+    color: #1a1a1a;
+}
+
+.filter-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-select, .filter-input {
+    padding: 0.3rem 0.6rem;
+    border: 1px solid #1a1a1a;
+    background: #faf6f0;
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 0.75rem;
+    color: #1a1a1a;
+    outline: none;
+}
+
+.filter-input {
+    width: 140px;
+}
+
+.filter-select:hover, .filter-input:focus {
+    background: #ffffff;
+}
