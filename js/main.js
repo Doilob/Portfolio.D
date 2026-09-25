@@ -142,3 +142,37 @@ fetch('projects.json')
     }
     filterAndSortProjects();
   });
+// status에 따른 라운드 배지 배경색 동적 설정
+let statusBgColor = '#c84b29'; // 기본 IN PROGRESS (주황빛)
+if (proj.status === 'COMPLETED') {
+  statusBgColor = '#2d6a4f';   // COMPLETED (초록빛)
+} else if (proj.status === 'DROPPED') {
+  statusBgColor = '#6c757d';   // DROPPED (회색빛)
+}
+
+const articleHTML = `
+  <article class="project-card">
+    <div class="project-header-bar">
+      <span class="project-num">${proj.title}</span>
+      <span class="badge ${badgeClass}">${proj.badgeTag || 'PROJECT'}</span>
+    </div>
+    
+    <div class="project-content">
+      <div class="image-box">
+        <img src="${proj.image}" alt="${proj.headline}" style="width:100%; height:180px; object-fit:cover; margin-bottom:0.8rem; border-radius:4px; filter:sepia(10%);">
+        <div class="sub-tags">
+          <!-- 🎨 상태에 따라 배경색이 실시간으로 바뀌도록 인라인 스타일 적용 -->
+          <span class="badge" style="background-color: ${statusBgColor};">${proj.status || 'IN PROGRESS'}</span>
+          <p class="date-info">📅 ${proj.date}</p>
+        </div>
+      </div>
+
+      <div class="text-box">
+        <h2>${proj.headline}</h2>
+        <p class="author">${proj.author}</p>
+        <p class="excerpt">${proj.summary}</p>
+        <a href="detail.html?id=${proj.id}" class="read-more">Continue reading &rarr;</a>
+      </div>
+    </div>
+  </article>
+`;
