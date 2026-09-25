@@ -1,119 +1,105 @@
-// 1. Dynamic Today's Date
+// 1. 날짜 동적 표시
 function updateDate() {
-const now = new Date();
-const options = { year: 'numeric', month: 'short', day: '2-digit' };
-const formattedDate = now.toLocaleDateString('en-US', options).toUpperCase();
-
-const dateEl = document.getElementById('current-date');
-if (dateEl) dateEl.innerText = `TODAY: ${formattedDate}`;
-
-const yearEl = document.getElementById('footer-year');
-if (yearEl) yearEl.innerText = now.getFullYear();
+  const now = new Date();
+  const options = { year: 'numeric', month: 'short', day: '2-digit' };
+  const formattedDate = now.toLocaleDateString('en-US', options).toUpperCase();
+  
+  const headerDate = document.getElementById('header-date');
+  if (headerDate) headerDate.innerText = `TODAY: ${formattedDate}`;
+  
+  const yearEl = document.getElementById('footer-year');
+  if (yearEl) yearEl.innerText = now.getFullYear();
 }
 updateDate();
 
-// 2. YouTube Random Track Dynamic Player
-const samplePlaylist = [
-{ title: "Lofi Beats for Focus", artist: "ChillHop" },
-{ title: "Jazz Background Melodies", artist: "Blue Note Radio" },
-{ title: "Acoustic Morning Vibes", artist: "Studio Session" },
-{ title: "Classical Piano Concerto", artist: "Philharmonic" },
-{ title: "Ambient Workspace Flow", artist: "Deep Focus" }
-];
-
-function loadRandomTrack() {
-const trackEl = document.getElementById('youtube-track');
-if (!trackEl) return;
-const daySeed = Math.floor(new Date().getTime() / (1000 * 60 * 60 * 24));
-const track = samplePlaylist[daySeed % samplePlaylist.length];
-trackEl.innerHTML = `<span style="color:#e25b36;">▶</span> TODAY'S TRACK: <strong>${track.title}</strong> - ${track.artist}`;
-}
-loadRandomTrack();
-
-// 3. Load Projects Data
+// 2. 기본 데이터 (projects.json 로드 실패 시 백업용)
 const defaultProjects = [
-{
-id: "proj-1",
-title: "Project 1: Redesigning a Global Brand",
-status: "IN PROGRESS",
-headline: "Revolutionizing Visual Identity",
-author: "by Sarah Jenkins",
-date: "May, 2024 • Sep. 12, 2026",
-badgeTag: "BRANDING",
-image: "project1.jpg",
-summary: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-},
-{
-id: "proj-2",
-title: "Project 2: Digital Editorial Platform",
-status: "DROPPED",
-headline: "Curating Stories for the Modern Reader",
-author: "by Sarah Jenkins",
-date: "Jan. 13, 2024",
-badgeTag: "EDITORIAL",
-image: "project2.jpg",
-summary: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-},
-{
-id: "proj-3",
-title: "Project 3: Interactive Web Experience",
-status: "COMPLETED",
-headline: "Engaging Users Through Immersive Design",
-author: "by Sarah Jenkins",
-date: "May, 2024 • Sat. 15, 2024",
-badgeTag: "WEB",
-image: "project3.jpg",
-summary: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-}
+  {
+    id: "proj-1",
+    title: "Project 1: Redesigning a Global Brand",
+    status: "IN PROGRESS",
+    headline: "Revolutionizing Visual Identity",
+    author: "by Sarah Jenkins",
+    date: "May, 2024 • Sep. 12, 2026",
+    badgeTag: "BRANDING",
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80",
+    summary: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+  },
+  {
+    id: "proj-2",
+    title: "Project 2: Digital Editorial Platform",
+    status: "DROPPED",
+    headline: "Curating Stories for the Modern Reader",
+    author: "by Sarah Jenkins",
+    date: "Jan. 13, 2024",
+    badgeTag: "EDITORIAL",
+    image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80",
+    summary: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+  },
+  {
+    id: "proj-3",
+    title: "Project 3: Interactive Web Experience",
+    status: "COMPLETED",
+    headline: "Engaging Users Through Immersive Design",
+    author: "by Sarah Jenkins",
+    date: "May, 2024 • Sat. 15, 2024",
+    badgeTag: "WEB",
+    image: "https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&w=800&q=80",
+    summary: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+  }
 ];
 
+// 3. 프로젝트 렌더링 함수 (CSS 클래스와 완벽 호환)
 function renderProjects(projects) {
-const container = document.getElementById('projects-container');
-if (!container) return;
-container.innerHTML = '';
+  const container = document.getElementById('projects-container');
+  if (!container) return;
+  container.innerHTML = '';
 
-projects.forEach(proj => {
-let statusClass = 'status-in-progress';
-if (proj.status === 'COMPLETED') statusClass = 'status-completed';
-if (proj.status === 'DROPPED') statusClass = 'status-dropped';
+  projects.forEach(proj => {
+    // 배지 태그 클래스 결정
+    let badgeClass = 'badge-branding';
+    if (proj.badgeTag === 'WEB') badgeClass = 'badge-web';
+    if (proj.badgeTag === 'EDITORIAL') badgeClass = 'badge-editorial';
+    if (proj.badgeTag === 'new') badgeClass = 'badge-branding';
 
-const articleHTML = `
-<article class="project-article">
-<div class="project-header">
-<h2 class="project-number">${proj.title}</h2>
-<span class="status-badge ${statusClass}">${proj.status}</span>
-</div>
+    const articleHTML = `
+      <article class="project-card">
+        <div class="project-header-bar">
+          <span class="project-num">${proj.title}</span>
+          <span class="badge ${badgeClass}">${proj.badgeTag || 'PROJECT'}</span>
+        </div>
+        
+        <div class="project-content">
+          <div class="image-box">
+            <img src="${proj.image}" alt="${proj.headline}" style="width:100%; height:180px; object-fit:cover; margin-bottom:0.8rem; border-radius:4px; filter:sepia(10%);">
+            <div class="sub-tags">
+              <span class="badge badge-featured">${proj.status || 'FEATURED'}</span>
+              <p class="date-info">📅 ${proj.date}</p>
+            </div>
+          </div>
 
-<div class="project-grid">
-<div class="project-media">
-<img src="${proj.image}" alt="${proj.headline}" class="project-img">
-<div class="media-meta">
-<span class="badge-tag">${proj.badgeTag || 'FEATURED'}</span>
-<span class="meta-date">📅 ${proj.date}</span>
-</div>
-</div>
-
-<div class="project-details">
-<h3 class="headline">${proj.headline}</h3>
-<p class="byline">${proj.author}</p>
-<p class="summary-text">${proj.summary}</p>
-<a href="#" class="continue-link">Continue reading &rarr;</a>
-</div>
-</div>
-</article>
-`;
-container.insertAdjacentHTML('beforeend', articleHTML);
-});
+          <div class="text-box">
+            <h2>${proj.headline}</h2>
+            <p class="author">${proj.author}</p>
+            <p class="excerpt">${proj.summary}</p>
+            <a href="#" class="read-more">Continue reading &rarr;</a>
+          </div>
+        </div>
+      </article>
+    `;
+    container.insertAdjacentHTML('beforeend', articleHTML);
+  });
 }
 
+// 4. 데이터 불러오기 (projects.json 우선, 없으면 localStorage 또는 기본값)
 fetch('projects.json')
-.then(res => res.json())
-.then(data => renderProjects(data))
-.catch(() => {
-const saved = localStorage.getItem('gazette_projects');
-if (saved) {
-renderProjects(JSON.parse(saved));
-} else {
-renderProjects(defaultProjects);
-}
-});
+  .then(res => res.json())
+  .then(data => renderProjects(data))
+  .catch(() => {
+    const saved = localStorage.getItem('gazette_projects');
+    if (saved) {
+      renderProjects(JSON.parse(saved));
+    } else {
+      renderProjects(defaultProjects);
+    }
+  });
