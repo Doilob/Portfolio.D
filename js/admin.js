@@ -1,4 +1,4 @@
-// 🔑 GIST_ID 설정
+// 🔑 GIST_ID 설정 (토큰은 세션 메모리로 임시 관리)
 const GIST_ID = "d584cff9f66dc32942cef6c3389befd2";
 let GITHUB_TOKEN = sessionStorage.getItem('gazette_temp_token') || "";
 
@@ -8,9 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const lockBtn = document.getElementById('auth-lock-btn');
   const statusBadge = document.getElementById('auth-status-badge');
 
-  // 1. 토큰 인증 상태에 따른 UI 업데이트
+  // 1. 현재 토큰 유효성 단순 검증 (Boolean)
+  function isAuthorized() {
+    return Boolean(GITHUB_TOKEN && GITHUB_TOKEN.trim().startsWith('ghp_'));
+  }
+
+  // 2. UI 인증 상태 업데이트
   function updateAuthUI() {
-    if (GITHUB_TOKEN && GITHUB_TOKEN.trim().startsWith('ghp_')) {
+    if (isAuthorized()) {
       if (statusBadge) {
         statusBadge.innerText = "🔓 인증 완료";
         statusBadge.className = "badge auth-status-active";
@@ -23,41 +28,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 2. 인증 필수 체크 함수 (인증되지 않았으면 prompt로 즉시 요청)
+  // 3. 미인증 시 즉시 팝업을 띄우고 검증하는 가드 함수
   function requireAuth() {
-    if (GITHUB_TOKEN && GITHUB_TOKEN.trim().startsWith('ghp_')) {
-      return true; // 이미 인증됨
-    }
+    if (isAuthorized()) return true;
 
     const inputToken = prompt(
-      "🔒 프로젝트 수정 및 삭제를 하려면 GitHub Personal Access Token (ghp_...) 인증이 필요합니다.\n토큰을 입력해 주세요:"
+      "🔒 관리자 권한이 필요합니다.\nGitHub Personal Access Token (ghp_...)을 입력해 주세요:"
     );
 
     if (inputToken !== null) {
-      const trimmed = inputToken.trim();
+      const trimmed = inputToken.replace(/\s+/g, '');
       if (trimmed && trimmed.startsWith('ghp_')) {
         GITHUB_TOKEN = trimmed;
         sessionStorage.setItem('gazette_temp_token', trimmed);
-        alert("🔓 인증에 성공하였습니다!");
+        alert("🔓 인증 성공! 저장 및 삭제 권한이 활성화되었습니다.");
         updateAuthUI();
-        fetchCloudProjects(); // 인증 후 최신 데이터 동기화
+        fetchCloudProjects();
         return true;
       } else {
-        alert("❌ 올바른 GitHub 토큰(ghp_...)이 아닙니다. 작업을 취소합니다.");
+        alert("❌ 올바른 토큰 형식이 아닙니다 ('ghp_'로 시작해야 함).");
       }
     }
-    return false; // 인증 실패/취소
+    return false;
   }
 
-  // 3. 🔒 자물쇠 버튼 클릭 이벤트
+  // 4. 🔒 자물쇠 버튼 클릭 이벤트
   if (lockBtn) {
     lockBtn.addEventListener('click', () => {
-      if (GITHUB_TOKEN) {
+      if (isAuthorized()) {
         if (confirm("현재 토큰 인증을 해제(로그아웃)하시겠습니까?")) {
           GITHUB_TOKEN = "";
           sessionStorage.removeItem('gazette_temp_token');
           alert("🔒 인증이 해제되었습니다.");
           updateAuthUI();
+          fetchCloudProjects();
         }
       } else {
         requireAuth();
@@ -67,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateAuthUI();
 
-  // 4. 이미지 파일 Base64 변환 및 압축 (최대 800px)
+  // 5. 이미지 파일 Base64 변환 및 압축 (최대 800px)
   function compressAndConvertToBase64(file, maxWidth = 800, quality = 0.8) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -100,10 +104,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 5. Gist에서 데이터 읽어오기 (PULL)
+  // 6. Gist에서 데이터 읽어오기 (PULL - 조회는 가능)
   async function fetchCloudProjects() {
-    if (!GITHUB_TOKEN) {
-      console.warn("토큰 미인증 상태 - 로컬 스토리지 데이터 표시");
+    if (!isAuthorized()) {
+      console.warn("미인증 상태: 읽기 전용 로컬 캐시 데이터를 표시합니다.");
       const saved = localStorage.getItem('gazette_projects');
       projectsCache = saved ? JSON.parse(saved) : [];
       renderAdminList();
@@ -134,14 +138,16 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAdminList();
   }
 
-  // 6. Gist로 데이터 저장하기 (PUSH)
+  // 7. Gist 및 로컬에 데이터 저장하기 (PUSH - 미인증 시 완전 차단)
   async function saveProjectsToCloud(projects) {
-    localStorage.setItem('gazette_projects', JSON.stringify(projects, null, 2));
-
-    if (!GITHUB_TOKEN) {
-      alert("⚠️ 토큰 인증이 필요합니다.");
+    // 🛑 강력 차단 가드: 인증 실패 시 로컬 스토리지 변경도 불가능
+    if (!isAuthorized()) {
+      alert("🛑 [경고] 인증되지 않은 상태에서는 저장 및 수정이 절대 불가능합니다.");
+      fetchCloudProjects(); // 기존 원래 데이터로 복구
       return;
     }
+
+    localStorage.setItem('gazette_projects', JSON.stringify(projects, null, 2));
 
     try {
       const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
@@ -161,17 +167,17 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (res.ok) {
-        alert('☁️ Gist 클라우드에 성공적으로 반영되었습니다!');
+        alert('☁️ Gist 클라우드에 성공적으로 저장되었습니다!');
       } else {
         alert('⚠️ Gist 저장 실패: 토큰 권한(gist 스코프)을 확인해 주세요.');
       }
     } catch (e) {
-      alert('네트워크 오류로 로컬 저장소에만 반영되었습니다.');
+      alert('네트워크 오류가 발생했습니다.');
     }
     renderAdminList();
   }
 
-  // 7. 관리자 목록 UI 출력 (인증 검증 이벤트 추가)
+  // 8. 관리자 목록 UI 출력
   function renderAdminList() {
     const listEl = document.getElementById('admin-projects-list');
     if (!listEl) return;
@@ -207,22 +213,22 @@ document.addEventListener('DOMContentLoaded', () => {
       listEl.appendChild(item);
     });
 
-    // ✏️ EDIT 버튼 클릭 시 토큰 인증 확인
+    // ✏️ EDIT 버튼 제어
     listEl.querySelectorAll('.edit-link').forEach(link => {
       link.addEventListener('click', function(e) {
         if (!requireAuth()) {
-          e.preventDefault(); // 인증 실패 시 edit.html 이동 차단
+          e.preventDefault(); // 미인증 시 edit.html 이동 거부
         }
       });
     });
 
-    // 🗑 DELETE 버튼 클릭 시 토큰 인증 확인
+    // 🗑 DELETE 버튼 제어
     listEl.querySelectorAll('.delete-btn').forEach(btn => {
       btn.addEventListener('click', async function() {
-        if (!requireAuth()) return; // 인증 실패 시 삭제 차단
+        if (!requireAuth()) return; // 미인증 시 즉시 취소
 
         const index = parseInt(this.getAttribute('data-index'), 10);
-        if (confirm('이 프로젝트를 삭제하고 Gist 클라우드에 반영하시겠습니까?')) {
+        if (confirm('이 프로젝트를 삭제하시겠습니까?')) {
           projectsCache.splice(index, 1);
           await saveProjectsToCloud(projectsCache);
         }
@@ -230,13 +236,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 8. 프로젝트 추가 폼 제출 시 토큰 인증 확인
+  // 9. 프로젝트 추가 폼 제출 제어
   const formEl = document.getElementById('project-form');
   if (formEl) {
     formEl.addEventListener('submit', async function(e) {
       e.preventDefault();
 
-      if (!requireAuth()) return; // 인증 실패 시 추가 차단
+      if (!requireAuth()) return; // 미인증 시 저장 거부
       
       const fileInput = document.getElementById('p-image-file');
       let base64Image = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80';
@@ -245,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
           base64Image = await compressAndConvertToBase64(fileInput.files[0]);
         } catch (err) {
-          alert('이미지 처리 중 오류가 발생했습니다. 기본 이미지를 사용합니다.');
+          alert('이미지 처리 중 오류가 발생했습니다.');
         }
       }
 
@@ -267,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 9. JSON 내보내기
+  // 10. JSON 내보내기
   const exportBtn = document.getElementById('export-json-btn');
   if (exportBtn) {
     exportBtn.addEventListener('click', function() {
