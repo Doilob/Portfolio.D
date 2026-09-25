@@ -601,3 +601,30 @@ body {
   background-color: #c84b29 !important;
   color: #fff !important;
 }
+/* Admin Auth Header Layout */
+.admin-auth-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 10px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #d8d2c6;
+}
+
+.auth-btn-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-status-active {
+  background-color: #2d6a4f !important;
+  color: #fff !important;
+}
+
+.auth-status-inactive {
+  background-color: #c84b29 !important;
+  color: #fff !important;
+}
