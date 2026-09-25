@@ -1,4 +1,4 @@
-// 🔑 GIST_ID는 본인의 값으로 확인해주세요 (토큰 변수는 세션 메모리로 임시 관리)
+// 🔑 GIST_ID 설정 (토큰은 코드에 보관하지 않고 사용 시 세션 메모리에만 유지)
 const GIST_ID = "d584cff9f66dc32942cef6c3389befd2";
 let GITHUB_TOKEN = sessionStorage.getItem('gazette_temp_token') || "";
 
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const lockBtn = document.getElementById('auth-lock-btn');
   const statusBadge = document.getElementById('auth-status-badge');
 
-  // 1. 토큰 인증 상태에 따른 UI 배지 업데이트
+  // 1. 토큰 인증 상태에 따른 UI 업데이트
   function updateAuthUI() {
     if (GITHUB_TOKEN && GITHUB_TOKEN.trim().startsWith('ghp_')) {
       if (statusBadge) {
@@ -23,11 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 2. 🔒 자물쇠 버튼 클릭 시 prompt 팝업으로 토큰 요청
+  // 2. 🔒 버튼 클릭 시 토큰 직접 입력 (prompt 사용)
   if (lockBtn) {
     lockBtn.addEventListener('click', () => {
       const inputToken = prompt(
-        "GitHub Personal Access Token (ghp_...)을 입력해 주세요.\n입력된 토큰은 세션 동안만 브라우저 메모리에 임시 저장됩니다:",
+        "GitHub Personal Access Token (ghp_...)을 입력해 주세요.\n입력된 토큰은 탭을 닫기 전까지 메모리에만 임시 보관됩니다:",
         GITHUB_TOKEN
       );
 
@@ -36,9 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (trimmed) {
           GITHUB_TOKEN = trimmed;
           sessionStorage.setItem('gazette_temp_token', trimmed);
-          alert("🔑 토큰이 세션에 임시 저장되었습니다.");
+          alert("🔑 토큰이 임시 저장되었습니다.");
           updateAuthUI();
-          fetchCloudProjects(); // 최신 Gist 데이터 불러오기 시도
+          fetchCloudProjects();
         } else {
           GITHUB_TOKEN = "";
           sessionStorage.removeItem('gazette_temp_token');
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateAuthUI();
 
-  // 3. 이미지 파일 Base64 변환 및 자동 압축 (최대 800px)
+  // 3. 이미지 파일 Base64 변환 및 압축 (최대 800px)
   function compressAndConvertToBase64(file, maxWidth = 800, quality = 0.8) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -84,10 +84,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. Gist에서 최신 데이터 조회 (PULL)
+  // 4. Gist에서 데이터 읽어오기 (PULL)
   async function fetchCloudProjects() {
     if (!GITHUB_TOKEN) {
-      console.warn("토큰이 입력되지 않아 로컬 스토리지 데이터를 표시합니다.");
+      console.warn("토큰이 설정되지 않아 로컬 스토리지 데이터를 표시합니다.");
       const saved = localStorage.getItem('gazette_projects');
       projectsCache = saved ? JSON.parse(saved) : [];
       renderAdminList();
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         projectsCache = fileContent ? JSON.parse(fileContent) : [];
         localStorage.setItem('gazette_projects', JSON.stringify(projectsCache, null, 2));
       } else {
-        alert("⚠️ Gist 동기화 실패: 토큰 권한 또는 GIST ID를 확인해 주세요.");
+        alert("⚠️ Gist 동기화 실패: 토큰 권한이나 GIST ID를 확인해 주세요.");
       }
     } catch (e) {
       console.error("Gist fetch error:", e);
@@ -118,12 +118,12 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAdminList();
   }
 
-  // 5. Gist로 데이터 동기화 푸시 (PUSH - PATCH)
+  // 5. Gist로 데이터 저장하기 (PUSH)
   async function saveProjectsToCloud(projects) {
     localStorage.setItem('gazette_projects', JSON.stringify(projects, null, 2));
 
     if (!GITHUB_TOKEN) {
-      alert("⚠️ 토큰이 설정되지 않아 로컬 스토리지에만 저장되었습니다.\n상단의 🔒 토큰 인증하기 버튼을 눌러주세요.");
+      alert("⚠️ 토큰이 입력되지 않아 로컬 스토리지에만 저장되었습니다.\n상단의 🔒 토큰 인증하기 버튼을 눌러주세요.");
       renderAdminList();
       return;
     }
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAdminList();
   }
 
-  // 6. 관리자 목록 UI 렌더링
+  // 6. 관리자 목록 UI 출력
   function renderAdminList() {
     const listEl = document.getElementById('admin-projects-list');
     if (!listEl) return;
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
       listEl.appendChild(item);
     });
 
-    // 삭제 버튼 이벤트
+    // 삭제 이벤트
     listEl.querySelectorAll('.delete-btn').forEach(btn => {
       btn.addEventListener('click', async function() {
         const index = parseInt(this.getAttribute('data-index'), 10);
@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 7. 프로젝트 추가 폼 제출 처리
+  // 7. 폼 제출 (프로젝트 추가)
   const formEl = document.getElementById('project-form');
   if (formEl) {
     formEl.addEventListener('submit', async function(e) {
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 8. 백업용 JSON 직접 다운로드
+  // 8. JSON 내보내기
   const exportBtn = document.getElementById('export-json-btn');
   if (exportBtn) {
     exportBtn.addEventListener('click', function() {
