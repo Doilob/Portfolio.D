@@ -1,6 +1,6 @@
 // 🔑 GitHub Gist 설정값
 const GIST_ID = "d584cff9f66dc32942cef6c3389befd2";
-const GITHUB_TOKEN = "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"; // ghp_...
+const GITHUB_TOKEN = ""; // ghp_...
 
 // 1. 헤더/푸터 날짜 동적 표시
 function updateDate() {
