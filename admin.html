@@ -62,9 +62,11 @@
             <input type="text" id="p-author" placeholder="예: by Sehyun, Kim / 2026.09.25 ~">
           </div>
 
+          <!-- 기존 URL 입력 필드 대신 아래 파일 업로드 필드로 교체 -->
           <div class="form-group">
-            <label>Image URL</label>
-            <input type="url" id="p-image" placeholder="https://images.unsplash.com/...">
+            <label for="p-image-file">Project Image File</label>
+            <input type="file" id="p-image-file" accept="image/*" required>
+            <small style="color: #666; font-size: 0.75rem;">이미지 파일(JPG, PNG, WEBP)을 업로드하면 자동으로 압축 변환되어 저장됩니다.</small>
           </div>
 
           <div class="form-group">
