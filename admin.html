@@ -4,77 +4,75 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Gazette Project Manager</title>
-  <!-- styles 폴더 안에 있는 style.css를 올바르게 불러옵니다 -->
   <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
   <div class="gazette-container">
-    <header class="masthead">
-      <nav class="nav-links">
+    <header class="gazette-header">
+      <nav class="top-nav">
         <a href="index.html">&larr; Back to Main Gazette</a>
       </nav>
-      <h1 class="newspaper-title">PROJECT MANAGER</h1>
-      <div class="masthead-bottom-border"></div>
+      <h1 class="main-title" style="font-size: 2.5rem;">PROJECT MANAGER</h1>
     </header>
 
-    <main class="admin-main">
-      <section class="admin-card">
-        <h2>➕ Add / Edit Project Entry</h2>
+    <main class="admin-main" style="max-width: 800px; margin: 0 auto; padding: 20px 0;">
+      <section class="admin-card" style="background: #faf6f0; border: 1px solid #1a1a1a; padding: 25px;">
+        <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 20px;">➕ Add New Project</h2>
         <form id="project-form" class="admin-form">
-          <div class="form-group">
-            <label>Project Title (e.g. Project 4: Brand Redesign)</label>
-            <input type="text" id="p-title" required placeholder="Project 4: New Venture">
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Project Title</label>
+            <input type="text" id="p-title" required placeholder="김세현의 취업" style="width:100%; padding:10px; border:1px solid #ccc;">
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>Status (작업 상태)</label>
-              <select id="p-status">
-                <option value="IN PROGRESS">IN PROGRESS (주황색 - 진행중)</option>
-                <option value="COMPLETED">COMPLETED (초록색 - 완료)</option>
-                <option value="DROPPED">DROPPED (빨간색 - 폐기)</option>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+            <div>
+              <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Status</label>
+              <select id="p-status" style="width:100%; padding:10px; border:1px solid #ccc;">
+                <option value="IN PROGRESS">IN PROGRESS (진행중)</option>
+                <option value="COMPLETED">COMPLETED (완료)</option>
+                <option value="DROPPED">DROPPED (폐기)</option>
               </select>
             </div>
-            <div class="form-group">
-              <label>Badge Tag</label>
-              <input type="text" id="p-tag" placeholder="BRANDING / EDITORIAL / WEB">
+            <div>
+              <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Badge Tag</label>
+              <input type="text" id="p-tag" placeholder="new / BRANDING / WEB" style="width:100%; padding:10px; border:1px solid #ccc;">
             </div>
           </div>
 
-          <div class="form-group">
-            <label>Headline (메인 헤드라인)</label>
-            <input type="text" id="p-headline" required placeholder="Innovative User Experience">
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Headline</label>
+            <input type="text" id="p-headline" required placeholder="와 김세현 뒤집어 놓았다" style="width:100%; padding:10px; border:1px solid #ccc;">
           </div>
 
-          <div class="form-group">
-            <label>Author / Date</label>
-            <input type="text" id="p-author" placeholder="by Sarah Jenkins | Sep. 2026">
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Author / Date Info</label>
+            <input type="text" id="p-author" placeholder="by Sehyun, Kim / 2026.09.25 ~" style="width:100%; padding:10px; border:1px solid #ccc;">
           </div>
 
-          <div class="form-group">
-            <label>Image Name (이미지 파일명 또는 주소)</label>
-            <input type="text" id="p-image" placeholder="project4.jpg">
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Image URL</label>
+            <input type="url" id="p-image" placeholder="https://images.unsplash.com/..." style="width:100%; padding:10px; border:1px solid #ccc;">
           </div>
 
-          <div class="form-group">
-            <label>Summary Description (프로젝트 설명)</label>
-            <textarea id="p-summary" rows="4" required placeholder="Write a brief overview..."></textarea>
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Summary Description</label>
+            <textarea id="p-summary" rows="4" required placeholder="요호" style="width:100%; padding:10px; border:1px solid #ccc;"></textarea>
           </div>
 
-          <div class="btn-row">
-            <button type="submit" class="admin-btn btn-save">💾 Save Project</button>
-            <button type="button" id="export-json-btn" class="admin-btn btn-export">📥 Download projects.json</button>
-            <button type="button" id="reset-btn" class="admin-btn btn-reset">↺ Reset to Default</button>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="submit" style="padding:10px 20px; background:#1a1a1a; color:#fff; border:none; cursor:pointer; font-weight:bold;">💾 Save Project</button>
+            <button type="button" id="export-json-btn" style="padding:10px 20px; background:#c84b29; color:#fff; border:none; cursor:pointer; font-weight:bold;">📥 Download projects.json</button>
           </div>
         </form>
       </section>
 
-      <section class="admin-card" style="margin-top: 30px;">
-        <h2>📋 Current Projects List</h2>
-        <div id="admin-projects-list" class="admin-list"></div>
+      <section style="margin-top: 40px; background: #faf6f0; border: 1px solid #1a1a1a; padding: 25px;">
+        <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 20px;">📋 Current Projects List</h2>
+        <div id="admin-projects-list"></div>
       </section>
     </main>
   </div>
-<script src="js/admin.js"></script>
+
+  <script src="js/admin.js"></script>
 </body>
 </html>
