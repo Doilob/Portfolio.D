@@ -1,4 +1,4 @@
-// 🔑 GIST_ID 설정 (공개 읽기는 토큰 없이도 가능)
+// 🔑 GIST_ID 설정
 const GIST_ID = "d584cff9f66dc32942cef6c3389befd2";
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,25 +9,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusFilter = document.getElementById('status-filter');
   const searchInput = document.getElementById('search-input');
 
-  // 1. 등록된 모든 프로젝트에서 태그 목록을 추출해 선택 상자(<select>)에 동적 반영
+  // 1. 태그 옵션 동적 생성 함수 (안전 모드)
   function populateTagOptions(projects) {
     if (!tagFilter) return;
 
-    // 현재 선택된 값 보존
-    const currentValue = tagFilter.value;
+    // 현재 사용자가 선택하고 있던 값 백업
+    const currentValue = tagFilter.value || 'ALL';
 
-    // 프로젝트 목록에서 유효한 badgeTag들만 추출 후 중복 제거 (Set)
+    // 중복 제거용 집합
     const tagsSet = new Set();
+
     projects.forEach(p => {
-      if (p.badgeTag && p.badgeTag.trim() !== '') {
-        tagsSet.add(p.badgeTag.trim().toUpperCase());
+      if (p.badgeTag && String(p.badgeTag).trim() !== '') {
+        tagsSet.add(String(p.badgeTag).trim().toUpperCase());
       }
     });
 
-    // 기본 "ALL TAGS" 옵션으로 초기화
+    // 드롭다운 초기화
     tagFilter.innerHTML = '<option value="ALL">ALL TAGS</option>';
 
-    // 추출된 태그들을 알파벳 순으로 정렬하여 <option> 생성
+    // 태그 알파벳순 정렬 후 추가
     Array.from(tagsSet).sort().forEach(tag => {
       const option = document.createElement('option');
       option.value = tag;
@@ -35,25 +36,27 @@ document.addEventListener('DOMContentLoaded', () => {
       tagFilter.appendChild(option);
     });
 
-    // 기존 선택값 유지 (존재할 경우)
+    // 이전에 선택했던 값이 새로 만든 옵션 목록에 있으면 복원
     if (Array.from(tagFilter.options).some(opt => opt.value === currentValue)) {
       tagFilter.value = currentValue;
+    } else {
+      tagFilter.value = 'ALL';
     }
   }
 
-  // 2. 메인 페이지 프로젝트 카드 목록 렌더링
+  // 2. 카드 렌더링 함수
   function renderProjects(projects) {
     if (!projectsContainer) return;
     projectsContainer.innerHTML = '';
 
     if (projects.length === 0) {
-      projectsContainer.innerHTML = '<p class="form-help-text" style="padding: 20px 0; text-align: center;">조건에 맞는 프로젝트가 없습니다.</p>';
+      projectsContainer.innerHTML = '<p class="form-help-text" style="padding: 30px 0; text-align: center; width: 100%;">조건에 맞는 프로젝트가 없습니다.</p>';
       return;
     }
 
     projects.forEach(proj => {
       let statusBg = '#c84b29';
-      const statusText = (proj.status || 'IN PROGRESS').trim().toUpperCase();
+      const statusText = String(proj.status || 'IN PROGRESS').trim().toUpperCase();
       if (statusText === 'COMPLETED') statusBg = '#2d6a4f';
       if (statusText === 'DROPPED') statusBg = '#6c757d';
 
@@ -89,27 +92,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3. 필터링 및 검색 적용
+  // 3. 필터링 로직 (유연한 비교)
   function applyFilters() {
-    const selectedTag = tagFilter ? tagFilter.value : 'ALL';
-    const selectedStatus = statusFilter ? statusFilter.value : 'ALL';
+    const selectedTag = tagFilter ? tagFilter.value.toUpperCase() : 'ALL';
+    const selectedStatus = statusFilter ? statusFilter.value.toUpperCase() : 'ALL';
     const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
     const filtered = allProjects.filter(proj => {
-      // 태그 필터링
-      const matchTag = (selectedTag === 'ALL') || 
-                       (proj.badgeTag && proj.badgeTag.trim().toUpperCase() === selectedTag);
+      // 태그 필터
+      const projTag = String(proj.badgeTag || '').trim().toUpperCase();
+      const matchTag = (selectedTag === 'ALL') || (projTag === selectedTag);
 
-      // 상태 필터링
-      const projStatus = (proj.status || 'IN PROGRESS').trim().toUpperCase();
+      // 상태 필터
+      const projStatus = String(proj.status || 'IN PROGRESS').trim().toUpperCase();
       const matchStatus = (selectedStatus === 'ALL') || (projStatus === selectedStatus);
 
-      // 검색어 필터링 (제목, 한줄요약, 본문, 저자 대상)
+      // 검색 필터
       const matchQuery = !query || 
-        (proj.title && proj.title.toLowerCase().includes(query)) ||
-        (proj.headline && proj.headline.toLowerCase().includes(query)) ||
-        (proj.summary && proj.summary.toLowerCase().includes(query)) ||
-        (proj.author && proj.author.toLowerCase().includes(query));
+        String(proj.title || '').toLowerCase().includes(query) ||
+        String(proj.headline || '').toLowerCase().includes(query) ||
+        String(proj.summary || '').toLowerCase().includes(query) ||
+        String(proj.author || '').toLowerCase().includes(query);
 
       return matchTag && matchStatus && matchQuery;
     });
@@ -117,21 +120,21 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProjects(filtered);
   }
 
-  // 4. 데이터 로드 (로컬 캐시 즉시 표시 ➔ Gist 백그라운드 동기화)
+  // 4. 데이터 로드
   function loadProjectsData() {
-    // 1) 로컬 스토리지 데이터 먼저 렌더링
+    // 1) 로컬 캐시 즉시 반영
     const saved = localStorage.getItem('gazette_projects');
     if (saved) {
       try {
         allProjects = JSON.parse(saved);
         populateTagOptions(allProjects);
-        renderProjects(allProjects);
+        applyFilters();
       } catch (e) {
-        console.warn("Local storage parse error:", e);
+        console.warn("Cache parse error:", e);
       }
     }
 
-    // 2) Gist 클라우드에서 최신 데이터 가져오기
+    // 2) Gist 클라우드 동기화
     fetch(`https://api.github.com/gists/${GIST_ID}`, {
       headers: { 'Accept': 'application/vnd.github.v3+json' }
     })
@@ -142,17 +145,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fileContent) {
           allProjects = JSON.parse(fileContent);
           localStorage.setItem('gazette_projects', fileContent);
-          populateTagOptions(allProjects); // 새 태그 포함하여 드롭다운 다시 생성
+          populateTagOptions(allProjects);
           applyFilters(); // 필터 재적용
         }
       })
-      .catch(err => console.warn("Background Gist fetch failed:", err));
+      .catch(err => console.warn("Gist fetch failed:", err));
   }
 
-  // 5. 이벤트 리스너 연결
+  // 5. 이벤트 등록 ('change' 및 'input' 이벤트 모두 등록)
   if (tagFilter) tagFilter.addEventListener('change', applyFilters);
   if (statusFilter) statusFilter.addEventListener('change', applyFilters);
-  if (searchInput) searchInput.addEventListener('input', applyFilters);
+  if (searchInput) {
+    searchInput.addEventListener('input', applyFilters);
+    searchInput.addEventListener('keyup', applyFilters);
+  }
 
   loadProjectsData();
 });
