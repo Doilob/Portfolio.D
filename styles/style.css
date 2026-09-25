@@ -591,3 +591,13 @@ body {
   background: #ccc;
   color: #1a1a1a;
 }
+/* Auth Status Badge */
+.auth-status-active {
+  background-color: #2d6a4f !important;
+  color: #fff !important;
+}
+
+.auth-status-inactive {
+  background-color: #c84b29 !important;
+  color: #fff !important;
+}
