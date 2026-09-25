@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>THE PORTFOLIO GAZETTE</title>
+    <!-- 스타일 경로 확인 -->
     <link rel="stylesheet" href="styles/style.css">
-    
-    <!-- 기존의 긴 스크립트 코드를 지우고 아래 한 줄로 대체 -->
-    <script src="js/main.js"></script>
     
     <!-- Google Fonts 연결 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,7 +21,7 @@
             <a href="#about">ABOUT</a>
             <a href="#chronicle">CHRONICLE</a>
             <a href="#contact">CONTACT</a>
-            <a href="admin.html" class="admin-link">⚙ ADMIN</a>
+            <a href="admin.html" class="admin-link" style="color: #c84b29; font-weight: bold;">⚙ ADMIN</a>
         </nav>
 
         <!-- 신문 헤더 -->
@@ -32,49 +30,21 @@
             <div class="header-meta-bar">
                 <span>Vol. I, No. 1</span>
                 <span>— THE PORTFOLIO GAZETTE —</span>
-                <span>Est. 2024</span>
+                <span id="header-date">Est. 2026</span>
             </div>
         </header>
 
         <!-- 메인 콘텐츠 영역 (2컬럼 레이아웃) -->
         <main class="gazette-body">
             
-            <!-- 왼쪽/메인 기사 컬럼 -->
+            <!-- 왼쪽/메인 기사 컬럼 (projects.json 데이터가 동적으로 들어오는 곳) -->
             <section class="main-column" id="projects-container">
-            <!-- js/main.js가 이 곳에 projects.json 또는 로컬 데이터를 자동으로 그려줍니다 -->
+                <!-- JS가 자동으로 프로젝트 카드를 생성합니다 -->
             </section>
 
             <!-- 오른쪽 사이드바 컬럼 -->
             <aside class="sidebar-column">
                 
-                <!-- 프로젝트 2 -->
-                <article class="sidebar-widget">
-                    <div class="project-header-bar">
-                        <span class="project-num">Project 2: Digital Editorial Platform</span>
-                        <span class="badge badge-editorial">EDITORIAL</span>
-                    </div>
-                    
-                    <div class="widget-image">
-                        <div class="placeholder-icon">📷</div>
-                    </div>
-                    
-                    <div class="widget-text">
-                        <h3>Curating Stories for the Modern Reader</h3>
-                        <p class="author">by Sarah Jenkins</p>
-                        <p class="excerpt">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                        </p>
-                        <ul class="link-list">
-                            <li><a href="#">↳ Project story overview</a></li>
-                            <li><a href="#">↳ Project showcase & interactive features</a></li>
-                        </ul>
-                        <a href="#" class="read-more">Continue reading →</a>
-                    </div>
-                </article>
-
-                <hr class="divider">
-
-                <!-- 사이드바 섹션들 -->
                 <div class="sidebar-widget">
                     <h4>Latest Thinking</h4>
                     <p class="excerpt">
@@ -98,9 +68,9 @@
                 <div class="sidebar-widget">
                     <h4>Contact Information</h4>
                     <ul class="contact-links">
-                        <li><a href="#">Contact us</a></li>
-                        <li><a href="#">About stories</a></li>
-                        <li><a href="#">Chronicle us</a></li>
+                        <li><a href="mailto:ad652442@gmail.com">✉ ad652442@gmail.com</a></li>
+                        <li><a href="https://github.com" target="_blank">🔗 GitHub Profile</a></li>
+                        <li><a href="#">📰 Chronicle Archive</a></li>
                     </ul>
                 </div>
 
@@ -109,9 +79,11 @@
 
         <!-- 푸터 -->
         <footer class="gazette-footer">
-            <p>© THE PORTFOLIO GAZETTE. ALL RIGHTS RESERVED.</p>
+            <p>&copy; <span id="footer-year">2026</span> THE PORTFOLIO GAZETTE. ALL RIGHTS RESERVED.</p>
         </footer>
     </div>
 
+    <!-- 메인 로직 스크립트 연결 -->
+    <script src="js/main.js"></script>
 </body>
 </html>
