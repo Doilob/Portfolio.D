@@ -5,6 +5,40 @@ const GITHUB_TOKEN = "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"; // ghp_...
 document.addEventListener('DOMContentLoaded', () => {
   let projectsCache = [];
 
+  // 이미지 파일을 Base64로 변환 + 자동 압축 (너비 최대 800px)
+  function compressAndConvertToBase64(file, maxWidth = 800, quality = 0.8) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Webp 또는 Jpeg로 리사이징하여 Base64 인코딩
+          const base64Data = canvas.toDataURL('image/jpeg', quality);
+          resolve(base64Data);
+        };
+        img.onerror = (err) => reject(err);
+      };
+      reader.onerror = (err) => reject(err);
+    });
+  }
+
   // 1. Gist에서 최신 데이터 조회 (PULL)
   async function fetchCloudProjects() {
     try {
@@ -52,9 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (res.ok) {
-        alert('☁️ GitHub Gist 클라우드에 실시간 반영되었습니다!');
+        alert('☁️ 이미지와 데이터가 Gist 클라우드에 성공적으로 반영되었습니다!');
       } else {
-        alert('⚠️ Gist 저장 실패 (로컬 스토리지에만 저장됨)');
+        alert('⚠️ Gist 저장 실패 (로컬 스토리지 백업에 저장됨)');
       }
     } catch (e) {
       alert('네트워크 오류로 로컬에만 저장되었습니다.');
@@ -110,12 +144,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. 프로젝트 추가 폼 제출 처리
+  // 4. 프로젝트 추가 폼 제출 처리 (파일 업로드 처리 추가)
   const formEl = document.getElementById('project-form');
   if (formEl) {
     formEl.addEventListener('submit', async function(e) {
       e.preventDefault();
       
+      const fileInput = document.getElementById('p-image-file');
+      let base64Image = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80';
+
+      if (fileInput && fileInput.files.length > 0) {
+        try {
+          // 업로드한 이미지를 압축된 Base64로 변환
+          base64Image = await compressAndConvertToBase64(fileInput.files[0]);
+        } catch (err) {
+          alert('이미지 처리 중 오류가 발생했습니다. 기본 이미지를 사용합니다.');
+        }
+      }
+
       const newProj = {
         id: 'proj-' + Date.now(),
         title: document.getElementById('p-title').value,
@@ -124,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         headline: document.getElementById('p-headline').value,
         author: document.getElementById('p-author').value || 'by Author',
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-        image: document.getElementById('p-image').value || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+        image: base64Image,
         summary: document.getElementById('p-summary').value
       };
 
