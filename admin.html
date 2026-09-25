@@ -27,6 +27,16 @@
         <!-- admin.html 적절한 위치에 추가 -->
         <div id="debug-log" class="form-help-text">연동 상태 확인 중...</div>
       </div>
+      <!-- 제목 옆에 자물쇠 인증 버튼 추가 -->
+      <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+        <h1 class="main-title" style="margin: 0;">ADMIN MANAGER</h1>
+        <button type="button" id="auth-lock-btn" class="btn" style="background: #1a1a1a; color: #fff; padding: 6px 12px; font-size: 0.85rem; border-radius: 4px; cursor: pointer;">
+          🔒 토큰 인증하기
+        </button>
+        <span id="auth-status-badge" style="font-size: 0.8rem; padding: 4px 8px; border-radius: 4px; background: #c84b29; color: #fff; font-weight: bold;">
+          인증 필요
+        </span>
+      </div>
     </header>
 
     <main class="admin-main">
