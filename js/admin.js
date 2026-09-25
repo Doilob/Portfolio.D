@@ -196,3 +196,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
   fetchCloudProjects();
 });
+// 🔍 태블릿 전용 Gist 연동 자가 진단 함수
+async function checkGistConnection() {
+  const logEl = document.getElementById('debug-log');
+  if (!logEl) return;
+
+  logEl.innerText = "⏳ Gist 서버 연결 상태를 점검하는 중입니다...";
+  logEl.style.color = "#1a1a1a";
+
+  try {
+    const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (res.status === 200) {
+      const gistData = await res.json();
+      if (gistData.files && gistData.files['projects.json']) {
+        logEl.innerText = "✅ [성공] Gist ID와 토큰이 정상 연결되었습니다!";
+        logEl.style.color = "#2d6a4f";
+      } else {
+        logEl.innerText = "❌ [오류] Gist는 연결되었으나, 파일 이름이 'projects.json'이 아닙니다.";
+        logEl.style.color = "#c84b29";
+      }
+    } else if (res.status === 401 || res.status === 403) {
+      logEl.innerText = "❌ [토큰 오류] GITHUB_TOKEN 값이 틀렸거나 'gist' 권한이 없습니다.";
+      logEl.style.color = "#c84b29";
+    } else if (res.status === 404) {
+      logEl.innerText = "❌ [ID 오류] GIST_ID 번호가 올바르지 않습니다.";
+      logEl.style.color = "#c84b29";
+    } else {
+      logEl.innerText = `❌ [기타 오류] 서버 응답 코드: ${res.status}`;
+      logEl.style.color = "#c84b29";
+    }
+  } catch (err) {
+    logEl.innerText = "❌ [네트워크 오류] 인터넷 연결 상태나 스크립트 오타를 확인해 주세요.";
+    logEl.style.color = "#c84b29";
+  }
+}
+
+// 페이지 로드 시 진단 실행
+checkGistConnection();
