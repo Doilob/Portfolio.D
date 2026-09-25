@@ -1,5 +1,5 @@
 // 🔑 GIST_ID 설정
-const GIST_ID = "본인의_32자리_GIST_ID";
+const GIST_ID = "d584cff9f66dc32942cef6c3389befd2";
 let GITHUB_TOKEN = sessionStorage.getItem('gazette_temp_token') || "";
 
 document.addEventListener('DOMContentLoaded', () => {
