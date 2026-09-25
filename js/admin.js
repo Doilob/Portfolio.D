@@ -32,14 +32,15 @@ function renderAdminList() {
     const item = document.createElement('div');
     item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #ddd;";
     item.innerHTML = `
-      <div>
-        <strong>${proj.title}</strong> <span style="font-size:0.75rem; color:#c84b29; font-weight:bold;">[${proj.status}]</span>
-        <p style="font-size:0.8rem; color:#666;">${proj.headline}</p>
-      </div>
-      <button onclick="deleteProject(${idx})" style="background:#c84b29; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:4px;">Delete</button>
-    `;
-    listEl.appendChild(item);
-  });
+    <div>
+      <strong>${proj.title}</strong> <span style="font-size:0.75rem; color:#c84b29; font-weight:bold;">[${proj.status}]</span>
+      <p style="font-size:0.8rem; color:#666;">${proj.headline}</p>
+    </div>
+    <div style="display:flex; gap:6px;">
+      <a href="edit.html?id=${proj.id}" style="background:#1a1a1a; color:white; text-decoration:none; padding:5px 10px; font-size:0.75rem; border-radius:4px; display:inline-block; line-height:normal;">✏️ Edit</a>
+      <button onclick="deleteProject(${idx})" style="background:#c84b29; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:4px; font-size:0.75rem;">🗑 Delete</button>
+    </div>
+  `;
 }
 
 const formEl = document.getElementById('project-form');
