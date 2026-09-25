@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Detail - THE PORTFOLIO GAZETTE</title>
+    <link rel="stylesheet" href="styles/style.css">
+    
+    <!-- Google Fonts 연결 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..800;1,8..60,300..800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="gazette-container">
+        <!-- 상단 네비게이션 -->
+        <nav class="top-nav">
+            <a href="index.html">&larr; BACK TO GAZETTE</a>
+            <a href="index.html">WORK</a>
+            <a href="admin.html" class="admin-link" style="color: #c84b29; font-weight: bold;">⚙ ADMIN</a>
+        </nav>
+
+        <!-- 신문 헤더 -->
+        <header class="gazette-header">
+            <h1 class="main-title" id="article-title-masthead">SPECIAL REPORT</h1>
+            <div class="header-meta-bar">
+                <span id="article-category">FEATURED ARTICLE</span>
+                <span>— THE PORTFOLIO GAZETTE —</span>
+                <span id="article-date">DATE</span>
+            </div>
+        </header>
+
+        <!-- 상세 기사 본문 영역 (단일 컬럼 와이드 신문 레이아웃) -->
+        <main class="gazette-body" style="grid-template-columns: 1fr; max-width: 800px; margin: 0 auto;">
+            <article class="project-card" style="border: none;">
+                
+                <div class="project-header-bar">
+                    <span class="project-num" id="article-number">Loading Project...</span>
+                    <span class="badge badge-branding" id="article-status">IN PROGRESS</span>
+                </div>
+                
+                <div class="text-box" style="margin-bottom: 2rem;">
+                    <h2 id="article-headline" style="font-size: 2.4rem; margin-bottom: 1rem; line-height: 1.2;">Loading Headline...</h2>
+                    <p class="author" id="article-author" style="font-size: 0.95rem; font-style: italic; color: #444;">Author</p>
+                </div>
+
+                <div class="image-box" style="width: 100%; margin-bottom: 2rem;">
+                    <img id="article-image" src="" alt="Project Image" style="width: 100%; height: auto; max-height: 450px; object-fit: cover; border-radius: 4px; filter: sepia(10%); border: 1px solid #ccc;">
+                </div>
+
+                <div class="text-box" style="font-size: 1.05rem; line-height: 1.8;">
+                    <p class="excerpt" id="article-summary" style="font-size: 1.05rem; text-align: justify; margin-bottom: 1.5rem;">
+                        Loading detailed description...
+                    </p>
+                </div>
+
+                <div style="margin-top: 3rem; border-top: 1px solid #1a1a1a; padding-top: 1.5rem; text-align: center;">
+                    <a href="index.html" class="read-more" style="font-size: 0.9rem;">&larr; Return to Main Gazette</a>
+                </div>
+            </article>
+        </main>
+
+        <!-- 푸터 -->
+        <footer class="gazette-footer">
+            <p>&copy; 2026 THE PORTFOLIO GAZETTE. ALL RIGHTS RESERVED.</p>
+        </footer>
+    </div>
+
+    <!-- 상세 데이터 연동 스크립트 -->
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('id');
+
+        const defaultProjects = [
+          {
+            id: "proj-1",
+            title: "Project 1: Redesigning a Global Brand",
+            status: "IN PROGRESS",
+            headline: "Revolutionizing Visual Identity",
+            author: "by Sarah Jenkins",
+            date: "May, 2024 • Sep. 12, 2026",
+            badgeTag: "BRANDING",
+            image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80",
+            summary: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. 상세한 브랜드 리디자인 기사 원문 내용이 들어가는 자리입니다."
+          }
+        ];
+
+        function loadProjectDetail(projects) {
+            const project = projects.find(p => p.id === projectId) || projects[0];
+
+            if (project) {
+                document.getElementById('article-title-masthead').innerText = project.title;
+                document.getElementById('article-category').innerText = project.badgeTag || 'SPECIAL REPORT';
+                document.getElementById('article-date').innerText = project.date;
+                document.getElementById('article-number').innerText = project.title;
+                document.getElementById('article-status').innerText = project.status;
+                document.getElementById('article-headline').innerText = project.headline;
+                document.getElementById('article-author').innerText = project.author;
+                document.getElementById('article-image').src = project.image;
+                document.getElementById('article-summary').innerText = project.summary + " (추가 상세 리포트 내용: 이 프로젝트는 기획부터 디자인, 웹 퍼블리싱까지 완벽한 신문 에디토리얼 감성을 녹여내어 사용자에게 깊은 인상을 남기도록 설계되었습니다.)";
+            }
+        }
+
+        fetch('projects.json')
+          .then(res => res.json())
+          .then(data => loadProjectDetail(data))
+          .catch(() => {
+            const saved = localStorage.getItem('gazette_projects');
+            if (saved) {
+              loadProjectDetail(JSON.parse(saved));
+            } else {
+              loadProjectDetail(defaultProjects);
+            }
+          });
+    </script>
+</body>
+</html>
