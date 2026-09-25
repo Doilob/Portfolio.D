@@ -674,3 +674,58 @@ body {
     grid-template-columns: 1fr;
   }
 }
+/* ==========================================
+   Admin 2-Column Sidebar Layout
+   ========================================== */
+.admin-layout-grid {
+  display: grid;
+  grid-template-columns: 2.2fr 1fr;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.admin-main-column {
+  min-width: 0;
+}
+
+.admin-sidebar-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.widget-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid #1a1a1a;
+  padding-bottom: 0.3rem;
+}
+
+.widget-desc {
+  font-size: 0.8rem;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.sidebar-auth-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  background: #faf6f0;
+  padding: 12px;
+  border: 1px solid #d8d2c6;
+  margin-bottom: 10px;
+}
+
+.btn-block {
+  width: 100%;
+  text-align: center;
+}
+
+@media (max-width: 850px) {
+  .admin-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
