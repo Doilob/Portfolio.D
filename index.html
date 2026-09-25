@@ -1,112 +1,95 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE PORTFOLIO GAZETTE</title>
-    <link rel="stylesheet" href="styles/style.css">
-    
-    <!-- Google Fonts 연결 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..800;1,8..60,300..800&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE PORTFOLIO GAZETTE - Archive</title>
+  <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
+  <div class="gazette-container">
+    <!-- 상단 신문식 헤더 -->
+    <header class="gazette-header">
+      <nav class="top-nav">
+        <a href="index.html">FRONT PAGE</a>
+        <a href="admin.html">ADMIN PANEL</a>
+      </nav>
+      <h1 class="main-title">THE PORTFOLIO GAZETTE</h1>
+      <div class="header-meta-bar">
+        <span>VOL. I ... NO. 1</span>
+        <span>PERSONAL PROJECT ARCHIVE</span>
+        <span>SEOUL EDITION</span>
+      </div>
+    </header>
 
-    <div class="gazette-container">
-        <!-- 상단 네비게이션 -->
-        <nav class="top-nav">
-            <a href="#work">WORK</a>
-            <a href="#about">ABOUT</a>
-            <a href="#chronicle">CHRONICLE</a>
-            <a href="#contact">CONTACT</a>
-            <a href="admin.html" class="admin-link" style="color: #c84b29; font-weight: bold;">⚙ ADMIN</a>
-        </nav>
+    <!-- 🔍 신문 인덱스 스타일 필터 및 검색 바 -->
+    <section class="gazette-filter-bar">
+      <span class="filter-title">🔍 INDEX FILTER</span>
+      <div class="filter-controls">
+        <!-- 🏷️ 동적 태그 필터 (js/main.js에서 프로젝트 태그를 자동으로 추출해 채워줍니다) -->
+        <select id="tag-filter" class="filter-select">
+          <option value="ALL">ALL TAGS</option>
+        </select>
 
-        <!-- 신문 헤더 -->
-        <header class="gazette-header">
-            <h1 class="main-title">THE PORTFOLIO GAZETTE</h1>
-            <div class="header-meta-bar">
-                <span>Vol. I, No. 1</span>
-                <span id="youtube-track-header">▶ TODAY'S TRACK: Loading...</span>
-                <span id="header-date">Est. 2026</span>
-            </div>
-        </header>
+        <!-- 📌 상태 필터 -->
+        <select id="status-filter" class="filter-select">
+          <option value="ALL">ALL STATUS</option>
+          <option value="IN PROGRESS">IN PROGRESS (진행중)</option>
+          <option value="COMPLETED">COMPLETED (완료)</option>
+          <option value="DROPPED">DROPPED (폐기)</option>
+        </select>
 
-        <!-- 메인 콘텐츠 영역 (2컬럼 레이아웃) -->
-        <main class="gazette-body">
-            
-            <!-- 왼쪽/메인 기사 컬럼 -->
-            <section class="main-column">
-                
-                <!-- 🔍 클래식 신문 인덱스 스타일 검색 및 정렬 바 -->
-                <div class="gazette-filter-bar">
-                    <span class="filter-title">[ INDEX & SEARCH ]</span>
-                    <div class="filter-controls">
-                        <select id="filter-tag" class="filter-select">
-                            <option value="">ALL TAGS</option>
-                            <option value="BRANDING">BRANDING</option>
-                            <option value="WEB">WEB</option>
-                            <option value="EDITORIAL">EDITORIAL</option>
-                            <option value="new">NEW</option>
-                        </select>
+        <!-- 🔎 검색어 입력창 -->
+        <input type="text" id="search-input" class="filter-input" placeholder="Search archive...">
+      </div>
+    </section>
 
-                        <input type="text" id="filter-keyword" placeholder="Search archive..." class="filter-input">
+    <!-- 메인 레이아웃 (프로젝트 목록 + 사이드바) -->
+    <div class="gazette-body">
+      <!-- 왼쪽 2컬럼: 프로젝트 카드리스트 출력 영역 -->
+      <main id="projects-container">
+        <!-- js/main.js 에서 동적 카드 출력 -->
+      </main>
 
-                        <select id="sort-order" class="filter-select">
-                            <option value="latest">LATEST</option>
-                            <option value="oldest">OLDEST</option>
-                        </select>
-                    </div>
-                </div>
+      <!-- 오른쪽 1컬럼: 사이드바 -->
+      <aside class="sidebar-column">
+        <section class="sidebar-widget">
+          <h4>ABOUT THE GAZETTE</h4>
+          <p class="excerpt">
+            Welcome to the personal project archive. Built with static HTML/JS and powered dynamically via GitHub Gist backend.
+          </p>
+        </section>
 
-                <!-- 📦 projects.json 데이터가 동적으로 들어오는 공간 -->
-                <div id="projects-container"></div>
+        <hr class="divider">
 
-            </section>
+        <section class="sidebar-widget">
+          <h4>ARCHIVE CATEGORIES</h4>
+          <ul class="link-list">
+            <li>• BRANDING & IDENTITY</li>
+            <li>• WEB & INTERACTIVE</li>
+            <li>• EDITORIAL DESIGN</li>
+            <li>• SYSTEM ARCHITECTURE</li>
+          </ul>
+        </section>
 
-            <!-- 오른쪽 사이드바 컬럼 -->
-            <aside class="sidebar-column">
-                
-                <div class="sidebar-widget">
-                    <h4>Latest Thinking</h4>
-                    <p class="excerpt">
-                        This article tracks growth of design, free of the daily-developing materials and statements.
-                    </p>
-                    <a href="#" class="read-more">Read more →</a>
-                </div>
+        <hr class="divider">
 
-                <hr class="divider">
-
-                <div class="sidebar-widget">
-                    <h4>Design Philosophy</h4>
-                    <p class="excerpt">
-                        This collection outlines modern design philosophy; standard features, focus on content and identity.
-                    </p>
-                    <a href="#" class="read-more">Read more →</a>
-                </div>
-
-                <hr class="divider">
-
-                <div class="sidebar-widget">
-                    <h4>Contact Information</h4>
-                    <ul class="contact-links">
-                        <li><a href="mailto:ad652442@gmail.com">✉ ad652442@gmail.com</a></li>
-                        <li><a href="https://github.com" target="_blank">🔗 GitHub Profile</a></li>
-                        <li><a href="#">📰 Chronicle Archive</a></li>
-                    </ul>
-                </div>
-
-            </aside>
-        </main>
-
-        <!-- 푸터 -->
-        <footer class="gazette-footer">
-            <p>&copy; <span id="footer-year">2026</span> THE PORTFOLIO GAZETTE. ALL RIGHTS RESERVED.</p>
-        </footer>
+        <section class="sidebar-widget">
+          <h4>SYSTEM COMMANDS</h4>
+          <ul class="contact-links">
+            <li><a href="admin.html">🔐 Open Admin Manager</a></li>
+            <li><a href="https://github.com" target="_blank" rel="noopener">🐙 GitHub Profile</a></li>
+          </ul>
+        </section>
+      </aside>
     </div>
 
-    <!-- 메인 로직 스크립트 연결 -->
-    <script src="js/main.js"></script>
+    <!-- 푸터 -->
+    <footer class="gazette-footer">
+      <p>© THE PORTFOLIO GAZETTE — ALL RIGHTS RESERVED.</p>
+    </footer>
+  </div>
+
+  <script src="js/main.js"></script>
 </body>
 </html>
