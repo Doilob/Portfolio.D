@@ -37,8 +37,6 @@
 
         <!-- 메인 콘텐츠 영역 (2컬럼 레이아웃) -->
         <main class="gazette-body">
-            
-            <!-- 왼쪽/메인 기사 컬럼 (projects.json 데이터가 동적으로 들어오는 곳) -->
             <!-- WORK 탭 필터 및 정렬 바 -->
             <div class="filter-bar" style="display: flex; gap: 10px; margin-bottom: 20px; font-family: sans-serif; font-size: 0.8rem; align-items: center; background: #eae5dc; padding: 10px; border: 1px solid #d8d2c6; flex-wrap: wrap;">
                 <span><strong>🔍 FILTER WORK:</strong></span>
@@ -54,7 +52,8 @@
                     <option value="latest">Latest (최신순)</option>
                     <option value="oldest">Oldest (오래된순)</option>
                 </select>
-            </div>
+            </div>            
+            <!-- 왼쪽/메인 기사 컬럼 (projects.json 데이터가 동적으로 들어오는 곳) -->
             <section class="main-column" id="projects-container">
                 <!-- JS가 자동으로 프로젝트 카드를 생성합니다 -->
             </section>
