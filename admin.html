@@ -3,79 +3,96 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Gazette Project Manager</title>
+  <title>Admin - THE PORTFOLIO GAZETTE</title>
+  <!-- 기존 스타일 파일 연동 -->
   <link rel="stylesheet" href="styles/style.css">
+  
+  <!-- Google Fonts 연결 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..800;1,8..60,300..800&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="gazette-container">
+    <!-- 상단 헤더 -->
     <header class="gazette-header">
       <nav class="top-nav">
-        <a href="index.html">&larr; Back to Main Gazette</a>
+        <a href="index.html">&larr; BACK TO MAIN GAZETTE</a>
       </nav>
-      <h1 class="main-title" style="font-size: 2.5rem;">PROJECT MANAGER</h1>
+      <h1 class="main-title" style="font-size: 2.2rem;">PROJECT MANAGER</h1>
+      <div class="header-meta-bar">
+        <span>ADMINISTRATION PANEL</span>
+        <span>— THE PORTFOLIO GAZETTE —</span>
+        <span>SECURE ACCESS</span>
+      </div>
     </header>
 
-    <main class="admin-main" style="max-width: 800px; margin: 0 auto; padding: 20px 0;">
-      <section class="admin-card" style="background: #faf6f0; border: 1px solid #1a1a1a; padding: 25px;">
-        <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 20px;">➕ Add New Project</h2>
-        <form id="project-form" class="admin-form">
-          <div class="form-group" style="margin-bottom: 15px;">
-            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Project Title</label>
-            <input type="text" id="p-title" required placeholder="김세현의 취업" style="width:100%; padding:10px; border:1px solid #ccc;">
+    <main class="admin-main">
+      <!-- 프로젝트 추가 카드 -->
+      <section class="admin-card">
+        <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 20px; border-bottom: 1px solid #1a1a1a; padding-bottom: 8px;">➕ Add New Project</h2>
+        <form id="project-form">
+          <div class="form-group">
+            <label>Project Title</label>
+            <input type="text" id="p-title" required placeholder="예: 김세현의 취업">
           </div>
 
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-            <div>
-              <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Status</label>
-              <select id="p-status" style="width:100%; padding:10px; border:1px solid #ccc;">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+              <label>Status</label>
+              <select id="p-status">
                 <option value="IN PROGRESS">IN PROGRESS (진행중)</option>
                 <option value="COMPLETED">COMPLETED (완료)</option>
                 <option value="DROPPED">DROPPED (폐기)</option>
               </select>
             </div>
-            <div>
-              <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Badge Tag</label>
-              <input type="text" id="p-tag" placeholder="new / BRANDING / WEB" style="width:100%; padding:10px; border:1px solid #ccc;">
+            <div class="form-group">
+              <label>Badge Tag</label>
+              <input type="text" id="p-tag" placeholder="new / BRANDING / WEB">
             </div>
           </div>
 
-          <div class="form-group" style="margin-bottom: 15px;">
-            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Headline</label>
-            <input type="text" id="p-headline" required placeholder="와 김세현 뒤집어 놓았다" style="width:100%; padding:10px; border:1px solid #ccc;">
+          <div class="form-group">
+            <label>Headline</label>
+            <input type="text" id="p-headline" required placeholder="예: 와 김세현 뒤집어 놓았다">
           </div>
 
-          <div class="form-group" style="margin-bottom: 15px;">
-            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Author / Date Info</label>
-            <input type="text" id="p-author" placeholder="by Sehyun, Kim / 2026.09.25 ~" style="width:100%; padding:10px; border:1px solid #ccc;">
+          <div class="form-group">
+            <label>Author / Date Info</label>
+            <input type="text" id="p-author" placeholder="예: by Sehyun, Kim / 2026.09.25 ~">
           </div>
 
-          <div class="form-group" style="margin-bottom: 15px;">
-            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Image URL</label>
-            <input type="url" id="p-image" placeholder="https://images.unsplash.com/..." style="width:100%; padding:10px; border:1px solid #ccc;">
+          <div class="form-group">
+            <label>Image URL</label>
+            <input type="url" id="p-image" placeholder="https://images.unsplash.com/...">
           </div>
 
-          <div class="form-group" style="margin-bottom: 15px;">
-            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Summary Description</label>
-            <textarea id="p-summary" rows="4" required placeholder="요호" style="width:100%; padding:10px; border:1px solid #ccc;"></textarea>
+          <div class="form-group">
+            <label>Summary Description</label>
+            <textarea id="p-summary" rows="4" required placeholder="프로젝트 요약 내용을 입력하세요."></textarea>
           </div>
 
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button type="submit" style="padding:10px 20px; background:#1a1a1a; color:#fff; border:none; cursor:pointer; font-weight:bold;">💾 Save Project</button>
-            <button type="button" id="export-json-btn" style="padding:10px 20px; background:#c84b29; color:#fff; border:none; cursor:pointer; font-weight:bold;">📥 Download projects.json</button>
+          <div class="btn-group">
+            <button type="submit" class="btn-black">💾 Save Project</button>
+            <button type="button" id="export-json-btn" class="btn-orange">📥 Download projects.json</button>
+            <!-- 🐙 본인의 깃허브 주소로 변경해 주세요 -->
+            <a href="https://github.com/본인깃허브아이디/저장소이름/blob/main/projects.json" target="_blank" class="btn-github">🐙 GitHub 파일 수정하러 가기</a>
           </div>
         </form>
       </section>
 
-      <!-- 관리자 페이지 하단 리스트 영역 -->
-      <section style="margin-top: 40px; background: #f2efe9; border: 1.5px solid #1a1a1a; padding: 25px;">
-        <h2 style="font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 15px; border-bottom: 1px solid #1a1a1a; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05rem;">
-          📋 Archived Projects List
-        </h2>
+      <!-- 기존 프로젝트 리스트 섹션 -->
+      <section class="admin-card">
+        <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 15px; border-bottom: 1px solid #1a1a1a; padding-bottom: 8px;">📋 Archived Projects List</h2>
         <div id="admin-projects-list">
           <!-- js/admin.js가 리스트를 자동으로 채워줍니다 -->
         </div>
       </section>
     </main>
+
+    <footer class="gazette-footer">
+      <p>&copy; 2026 THE PORTFOLIO GAZETTE. ALL RIGHTS RESERVED.</p>
+    </footer>
   </div>
 
   <script src="js/admin.js"></script>
