@@ -10,126 +10,73 @@
   <div class="gazette-container">
     <header class="gazette-header">
       <nav class="top-nav">
-        <a href="admin.html">&larr; Back to Admin Manager</a>
+        <a href="admin.html" class="back-link">&larr; Back to Admin Manager</a>
       </nav>
-      <h1 class="main-title" style="font-size: 2.2rem;">EDIT PROJECT ENTRY</h1>
+      <h1 class="main-title edit-title">EDIT PROJECT ENTRY</h1>
     </header>
 
-    <main class="admin-main" style="max-width: 800px; margin: 0 auto; padding: 20px 0;">
-      <section class="admin-card" style="background: #faf6f0; border: 1px solid #1a1a1a; padding: 25px;">
-        <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 20px;">✏️ Modify Project Details</h2>
-        <form id="edit-form" class="admin-form">
+    <main class="admin-main edit-main">
+      <section class="admin-card edit-card">
+        <h2 class="edit-card-title">✏️ Modify Project Details</h2>
+        <form id="edit-project-form" class="admin-form">
           <input type="hidden" id="p-id">
           
-          <div class="form-group" style="margin-bottom: 15px;">
-            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Project Title</label>
-            <input type="text" id="p-title" required style="width:100%; padding:10px; border:1px solid #ccc; background:#fff;">
+          <div class="form-group">
+            <label for="p-title" class="form-label">Project Title</label>
+            <input type="text" id="p-title" class="form-input" required>
           </div>
 
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-            <div>
-              <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Status</label>
-              <select id="p-status" style="width:100%; padding:10px; border:1px solid #ccc; background:#fff;">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="p-status" class="form-label">Status</label>
+              <select id="p-status" class="form-select">
                 <option value="IN PROGRESS">IN PROGRESS (진행중)</option>
                 <option value="COMPLETED">COMPLETED (완료)</option>
                 <option value="DROPPED">DROPPED (폐기)</option>
               </select>
             </div>
-            <div>
-              <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Badge Tag</label>
-              <input type="text" id="p-tag" style="width:100%; padding:10px; border:1px solid #ccc; background:#fff;">
+            <div class="form-group">
+              <label for="p-tag" class="form-label">Badge Tag</label>
+              <input type="text" id="p-tag" class="form-input">
             </div>
           </div>
 
-          <div class="form-group" style="margin-bottom: 15px;">
-            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Headline</label>
-            <input type="text" id="p-headline" required style="width:100%; padding:10px; border:1px solid #ccc; background:#fff;">
+          <div class="form-group">
+            <label for="p-headline" class="form-label">Headline</label>
+            <input type="text" id="p-headline" class="form-input" required>
           </div>
 
-          <div class="form-group" style="margin-bottom: 15px;">
-            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Author / Date Info</label>
-            <input type="text" id="p-author" style="width:100%; padding:10px; border:1px solid #ccc; background:#fff;">
+          <div class="form-group">
+            <label for="p-author" class="form-label">Author / Date Info</label>
+            <input type="text" id="p-author" class="form-input">
           </div>
 
-          <div class="form-group" style="margin-bottom: 15px;">
-            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Image URL</label>
-            <input type="url" id="p-image" style="width:100%; padding:10px; border:1px solid #ccc; background:#fff;">
+          <!-- Base64 파일 업로드 및 이미지 미리보기 영역 -->
+          <div class="form-group">
+            <label class="form-label">Current Image Preview</label>
+            <div class="image-preview-container">
+              <img id="current-image-preview" class="image-preview" src="" alt="Current Project Image">
+            </div>
+            
+            <label for="p-image-file" class="form-label">Change Project Image File (Optional)</label>
+            <input type="file" id="p-image-file" class="form-file-input" accept="image/*">
+            <small class="form-help-text">새 이미지를 선택하지 않으면 기존 이미지가 그대로 유지됩니다.</small>
           </div>
 
-          <div class="form-group" style="margin-bottom: 15px;">
-            <label style="display:block; font-weight:bold; font-size:0.85rem; margin-bottom:5px;">Summary Description</label>
-            <textarea id="p-summary" rows="4" required style="width:100%; padding:10px; border:1px solid #ccc; background:#fff;"></textarea>
+          <div class="form-group">
+            <label for="p-summary" class="form-label">Summary Description</label>
+            <textarea id="p-summary" class="form-textarea" rows="4" required></textarea>
           </div>
 
-          <div style="display:flex; gap:10px;">
-            <button type="submit" style="padding:10px 20px; background:#1a1a1a; color:#fff; border:none; cursor:pointer; font-weight:bold;">💾 Update Project</button>
-            <a href="admin.html" style="padding:10px 20px; background:#ccc; color:#1a1a1a; text-decoration:none; font-weight:bold; display:inline-block; text-align:center;">Cancel</a>
+          <div class="form-btn-group">
+            <button type="submit" class="btn btn-primary">💾 Update Project</button>
+            <a href="admin.html" class="btn btn-secondary">Cancel</a>
           </div>
         </form>
       </section>
     </main>
   </div>
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetId = urlParams.get('id');
-
-    function getStoredProjects() {
-      const saved = localStorage.getItem('gazette_projects');
-      if (saved) return JSON.parse(saved);
-      return [
-        {
-          id: "proj-1",
-          title: "Project 1: Redesigning a Global Brand",
-          status: "IN PROGRESS",
-          headline: "Revolutionizing Visual Identity",
-          author: "by Sarah Jenkins",
-          date: "May 12, 2024",
-          badgeTag: "BRANDING",
-          image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80",
-          summary: "Lorem ipsum dolor sit amet."
-        }
-      ];
-    }
-
-    // 기존 데이터 폼에 채우기
-    const projects = getStoredProjects();
-    const currentProj = projects.find(p => p.id === targetId);
-
-    if (currentProj) {
-      document.getElementById('p-id').value = currentProj.id;
-      document.getElementById('p-title').value = currentProj.title || '';
-      document.getElementById('p-status').value = currentProj.status || 'IN PROGRESS';
-      document.getElementById('p-tag').value = currentProj.badgeTag || '';
-      document.getElementById('p-headline').value = currentProj.headline || '';
-      document.getElementById('p-author').value = currentProj.author || '';
-      document.getElementById('p-image').value = currentProj.image || '';
-      document.getElementById('p-summary').value = currentProj.summary || '';
-    }
-
-    // 수정 내용 저장 처리
-    document.getElementById('edit-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const id = document.getElementById('p-id').value;
-      
-      const idx = projects.findIndex(p => p.id === id);
-      if (idx !== -1) {
-        projects[idx].title = document.getElementById('p-title').value;
-        projects[idx].status = document.getElementById('p-status').value;
-        projects[idx].badgeTag = document.getElementById('p-tag').value;
-        projects[idx].headline = document.getElementById('p-headline').value;
-        projects[idx].author = document.getElementById('p-author').value;
-        projects[idx].image = document.getElementById('p-image').value;
-        projects[idx].summary = document.getElementById('p-summary').value;
-
-        localStorage.setItem('gazette_projects', JSON.stringify(projects, null, 2));
-        alert('프로젝트가 성공적으로 수정되었습니다!');
-        window.location.href = 'admin.html';
-      } else {
-        alert('프로젝트를 찾을 수 없습니다.');
-      }
-    });
-  <!-- edit.html 하단에 추가 -->
   <script src="js/edit.js"></script>
 </body>
 </html>
