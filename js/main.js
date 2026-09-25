@@ -34,7 +34,8 @@ loadRandomTrack();
 // 전역 프로젝트 데이터 저장 변수
 let globalProjects = [];
 
-// 3. 프로젝트 렌더링 및 필터링·정렬 적용 함수
+JavaScript
+// 3. 프로젝트 렌더링 함수 (상태별 색상 동적 적용)
 function renderProjects(projects) {
   const container = document.getElementById('projects-container');
   if (!container) return;
@@ -46,10 +47,21 @@ function renderProjects(projects) {
   }
 
   projects.forEach(proj => {
+    // 1. 태그 배지 클래스 결정
     let badgeClass = 'badge-branding';
     if (proj.badgeTag === 'WEB') badgeClass = 'badge-web';
     if (proj.badgeTag === 'EDITORIAL') badgeClass = 'badge-editorial';
     if (proj.badgeTag === 'new') badgeClass = 'badge-branding';
+
+    // 2. 프로젝트 상태(Status)에 따른 라운드 배지 배경색 동적 설정
+    let statusBgColor = '#c84b29'; // 기본 IN PROGRESS (주황빛)
+    const statusText = (proj.status || 'IN PROGRESS').trim().toUpperCase();
+    
+    if (statusText === 'COMPLETED') {
+      statusBgColor = '#2d6a4f';   // COMPLETED (초록빛)
+    } else if (statusText === 'DROPPED') {
+      statusBgColor = '#6c757d';   // DROPPED (회색빛)
+    }
 
     const articleHTML = `
       <article class="project-card">
@@ -62,7 +74,8 @@ function renderProjects(projects) {
           <div class="image-box">
             <img src="${proj.image}" alt="${proj.headline}" style="width:100%; height:180px; object-fit:cover; margin-bottom:0.8rem; border-radius:4px; filter:sepia(10%);">
             <div class="sub-tags">
-              <span class="badge badge-featured">${proj.status || 'FEATURED'}</span>
+              <!-- 상태 배지: 인라인 스타일로 색상 강제 적용 -->
+              <span class="badge" style="background-color: ${statusBgColor} !important; color: #fff;">${proj.status || 'IN PROGRESS'}</span>
               <p class="date-info">📅 ${proj.date}</p>
             </div>
           </div>
@@ -79,7 +92,6 @@ function renderProjects(projects) {
     container.insertAdjacentHTML('beforeend', articleHTML);
   });
 }
-
 // 필터 및 정렬 필터링 로직 수행
 function filterAndSortProjects() {
   const tagFilter = document.getElementById('filter-tag').value;
