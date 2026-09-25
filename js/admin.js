@@ -22,27 +22,44 @@ function saveProjects(projects) {
   renderAdminList();
 }
 
+// 기존 renderAdminList 함수를 이 코드로 교체해 주세요.
 function renderAdminList() {
   const projects = getStoredProjects();
   const listEl = document.getElementById('admin-projects-list');
   if (!listEl) return;
   listEl.innerHTML = '';
 
-  projects.forEach((proj, idx) => {
-    const item = document.createElement('div');
-    item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #ddd;";
-    item.innerHTML = `
-    <div>
-      <strong>${proj.title}</strong> <span style="font-size:0.75rem; color:#c84b29; font-weight:bold;">[${proj.status}]</span>
-      <p style="font-size:0.8rem; color:#666;">${proj.headline}</p>
-    </div>
-    <div style="display:flex; gap:6px;">
-      <a href="edit.html?id=${proj.id}" style="background:#1a1a1a; color:white; text-decoration:none; padding:5px 10px; font-size:0.75rem; border-radius:4px; display:inline-block; line-height:normal;">✏️ Edit</a>
-      <button onclick="deleteProject(${idx})" style="background:#c84b29; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:4px; font-size:0.75rem;">🗑 Delete</button>
-    </div>
-  `;
-}
+  if (projects.length === 0) {
+    listEl.innerHTML = '<p style="font-family: \'Source Serif 4\', Georgia, serif; font-style: italic; color: #666; font-size: 0.85rem; padding: 10px 0;">No projects registered in the archive.</p>';
+    return;
+  }
 
+  projects.forEach((proj, idx) => {
+    // 상태별 배지 색상 매칭
+    let statusBg = '#c84b29'; // 기본 IN PROGRESS (주황빛)
+    if (proj.status === 'COMPLETED') statusBg = '#2d6a4f'; // 완료 (초록빛)
+    if (proj.status === 'DROPPED') statusBg = '#6c757d';   // 폐기 (회색)
+
+    const item = document.createElement('div');
+    item.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #d8d2c6;";
+    
+    item.innerHTML = `
+      <div style="padding-right: 15px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+          <strong style="font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #1a1a1a;">${proj.title}</strong>
+          <span style="font-family: sans-serif; font-size: 0.6rem; padding: 0.15rem 0.5rem; background: ${statusBg}; color: #fff; border-radius: 10px; font-weight: 700; letter-spacing: 0.05rem;">${proj.status}</span>
+        </div>
+        <p style="font-family: 'Source Serif 4', Georgia, serif; font-size: 0.82rem; color: #444; margin: 0;">${proj.headline || ''}</p>
+      </div>
+      
+      <div style="display: flex; gap: 6px; flex-shrink: 0;">
+        <a href="edit.html?id=${proj.id}" style="padding: 6px 12px; background: #1a1a1a; color: #fff; text-decoration: none; font-family: sans-serif; font-size: 0.72rem; font-weight: bold; border-radius: 2px; transition: opacity 0.2s;">✏️ EDIT</a>
+        <button onclick="deleteProject(${idx})" style="padding: 6px 12px; background: #c84b29; color: #fff; border: none; cursor: pointer; font-family: sans-serif; font-size: 0.72rem; font-weight: bold; border-radius: 2px;">🗑 DELETE</button>
+      </div>
+    `;
+    listEl.appendChild(item);
+  });
+}
 const formEl = document.getElementById('project-form');
 if (formEl) {
   formEl.addEventListener('submit', function(e) {
