@@ -1,16 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // URL에서 id 파라미터 추출 (?id=proj-12345)
   const urlParams = new URLSearchParams(window.location.search);
   const projectId = urlParams.get('id');
 
   let projectsCache = [];
   let currentProjectIndex = -1;
+  let saveConfirmState = false; // 2단계 저장 확인 플래그
 
   const summaryInput = document.getElementById('p-summary');
   const previewDiv = document.getElementById('md-preview');
   const mdToolbar = document.getElementById('md-toolbar');
   const btnWrite = document.getElementById('btn-mode-write');
   const btnPreview = document.getElementById('btn-mode-preview');
+  const editForm = document.getElementById('edit-project-form');
+  const submitBtn = editForm ? editForm.querySelector('button[type="submit"]') : null;
 
   function isAuthorized() {
     return window.GazetteAuth && window.GazetteAuth.isAuthorized();
@@ -24,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return window.GazetteAuth ? window.GazetteAuth.getToken() : "";
   }
 
-  // 간단한 마크다운 -> HTML 변환 파서
   function parseMarkdown(text) {
     if (!text) return '';
     let html = text;
@@ -39,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return html.replace(/\n/g, '<br>');
   }
 
-  // 1. 마크다운 툴바 버튼 클릭 이벤트
+  // 1. 🔗 링크 버튼 클릭 시 팝업 창(prompt) 지원
   if (mdToolbar) {
     mdToolbar.addEventListener('click', (e) => {
       const btn = e.target.closest('button');
@@ -51,14 +52,19 @@ document.addEventListener('DOMContentLoaded', () => {
       const selectedText = summaryInput.value.substring(start, end);
       let replacement = '';
 
-      switch (action) {
-        case 'bold': replacement = `**${selectedText || 'bold text'}**`; break;
-        case 'italic': replacement = `*${selectedText || 'italic text'}*`; break;
-        case 'h1': replacement = `\n# ${selectedText || 'Header 1'}\n`; break;
-        case 'h2': replacement = `\n## ${selectedText || 'Header 2'}\n`; break;
-        case 'quote': replacement = `\n> ${selectedText || 'Quote text'}\n`; break;
-        case 'list': replacement = `\n- ${selectedText || 'List item'}\n`; break;
-        case 'link': replacement = `[${selectedText || 'Link text'}](https://example.com)`; break;
+      if (action === 'link') {
+        const inputUrl = prompt("🔗 연결할 웹사이트 URL 주소를 입력하세요:", "https://");
+        if (!inputUrl) return; // 취소 시 중단
+        replacement = `[${selectedText || '링크 텍스트'}](${inputUrl.trim()})`;
+      } else {
+        switch (action) {
+          case 'bold': replacement = `**${selectedText || 'bold text'}**`; break;
+          case 'italic': replacement = `*${selectedText || 'italic text'}*`; break;
+          case 'h1': replacement = `\n# ${selectedText || 'Header 1'}\n`; break;
+          case 'h2': replacement = `\n## ${selectedText || 'Header 2'}\n`; break;
+          case 'quote': replacement = `\n> ${selectedText || 'Quote text'}\n`; break;
+          case 'list': replacement = `\n- ${selectedText || 'List item'}\n`; break;
+        }
       }
 
       summaryInput.setRangeText(replacement, start, end, 'select');
@@ -66,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 2. 탭 전환 (Write / Live Preview)
+  // 2. 탭 전환 (Write / Preview)
   if (btnWrite && btnPreview) {
     btnWrite.addEventListener('click', () => {
       summaryInput.style.display = 'block';
@@ -90,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3. 이미지 파일 Base64 압축 변환 헬퍼
   function compressAndConvertToBase64(file, maxWidth = 800, quality = 0.8) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -123,15 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. 기존 프로젝트 데이터 로드 및 폼 자동 작성 (Pre-fill)
   async function loadProjectData() {
     const saved = localStorage.getItem('gazette_projects');
     if (saved) {
-      try {
-        projectsCache = JSON.parse(saved);
-      } catch (e) {
-        console.error("Local storage parse error:", e);
-      }
+      try { projectsCache = JSON.parse(saved); } catch (e) {}
     }
 
     if (isAuthorized()) {
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       } catch (e) {
-        console.warn("Gist fetch failed in edit page:", e);
+        console.warn("Gist fetch failed:", e);
       }
     }
 
@@ -181,10 +181,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 5. 수정 사항 저장 이벤트 처리
-  const formEl = document.getElementById('edit-project-form');
-  if (formEl) {
-    formEl.addEventListener('submit', async function(e) {
+  // 3. 2단계 확인 및 이중 저장 차단 로직
+  if (editForm && submitBtn) {
+    editForm.addEventListener('submit', async function(e) {
       e.preventDefault();
 
       if (!isAuthorized()) {
@@ -194,32 +193,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (currentProjectIndex === -1) return;
 
-      const fileInput = document.getElementById('p-image-file');
-      let base64Image = projectsCache[currentProjectIndex].image;
-
-      if (fileInput && fileInput.files.length > 0) {
-        try {
-          base64Image = await compressAndConvertToBase64(fileInput.files[0]);
-        } catch (err) {
-          alert('이미지 처리 중 오류가 발생했습니다.');
-        }
+      // 1단계: 정말 저장할지 확인 버튼 상태로 전환
+      if (!saveConfirmState) {
+        saveConfirmState = true;
+        submitBtn.innerText = "❓ 정말 저장하시겠습니까?";
+        submitBtn.style.background = "var(--accent-orange, #c84b29)";
+        
+        // 5초간 입력이 없으면 원상복구
+        setTimeout(() => {
+          if (saveConfirmState && !submitBtn.disabled) {
+            saveConfirmState = false;
+            submitBtn.innerText = "💾 Save Changes";
+            submitBtn.style.background = "var(--text-main)";
+          }
+        }, 5000);
+        return;
       }
 
-      projectsCache[currentProjectIndex] = {
-        ...projectsCache[currentProjectIndex],
-        title: document.getElementById('p-title').value,
-        status: document.getElementById('p-status').value,
-        badgeTag: document.getElementById('p-tag').value || 'PROJECT',
-        author: document.getElementById('p-author').value,
-        date: document.getElementById('p-date').value,
-        headline: document.getElementById('p-headline').value,
-        image: base64Image,
-        summary: summaryInput.value
-      };
-
-      localStorage.setItem('gazette_projects', JSON.stringify(projectsCache, null, 2));
+      // 2단계: 저장 진행 (버튼 비활성화 및 중복 방지)
+      submitBtn.disabled = true;
+      submitBtn.innerText = "⏳ 저장 중...";
+      submitBtn.style.background = "var(--accent-gray, #6c757d)";
 
       try {
+        const fileInput = document.getElementById('p-image-file');
+        let base64Image = projectsCache[currentProjectIndex].image;
+
+        if (fileInput && fileInput.files.length > 0) {
+          try {
+            base64Image = await compressAndConvertToBase64(fileInput.files[0]);
+          } catch (err) {
+            alert('이미지 처리 중 오류가 발생했습니다.');
+          }
+        }
+
+        projectsCache[currentProjectIndex] = {
+          ...projectsCache[currentProjectIndex],
+          title: document.getElementById('p-title').value,
+          status: document.getElementById('p-status').value,
+          badgeTag: document.getElementById('p-tag').value || 'PROJECT',
+          author: document.getElementById('p-author').value,
+          date: document.getElementById('p-date').value,
+          headline: document.getElementById('p-headline').value,
+          image: base64Image,
+          summary: summaryInput.value
+        };
+
+        localStorage.setItem('gazette_projects', JSON.stringify(projectsCache, null, 2));
+
         const res = await fetch(`https://api.github.com/gists/${getGistId()}`, {
           method: 'PATCH',
           headers: {
@@ -241,11 +262,22 @@ document.addEventListener('DOMContentLoaded', () => {
           window.location.href = "admin.html";
         } else {
           alert('⚠️ Gist 수정 저장 실패: 토큰 권한을 확인해 주세요.');
+          resetSubmitBtn();
         }
       } catch (err) {
         alert('네트워크 오류가 발생했습니다.');
+        resetSubmitBtn();
       }
     });
+  }
+
+  function resetSubmitBtn() {
+    saveConfirmState = false;
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "💾 Save Changes";
+      submitBtn.style.background = "var(--text-main)";
+    }
   }
 
   loadProjectData();
