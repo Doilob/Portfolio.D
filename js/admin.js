@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return window.GazetteAuth ? window.GazetteAuth.getToken() : "";
   }
 
-  // 간단한 마크다운 -> HTML 변환 파서
   function parseMarkdown(text) {
     if (!text) return '';
     let html = text;
@@ -41,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return html.replace(/\n/g, '<br>');
   }
 
-  // 1. 🔗 마크다운 툴바 및 팝업 링크 처리
+  // 1. 🔗 마크다운 툴바 및 팝업 링크
   if (mdToolbar) {
     mdToolbar.addEventListener('click', (e) => {
       const btn = e.target.closest('button');
@@ -97,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Gist 데이터 불러오기
   async function fetchCloudProjects() {
     if (!isAuthorized()) {
       const saved = localStorage.getItem('gazette_projects');
@@ -128,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAdminList();
   }
 
-  // Gist 클라우드 저장
   async function saveProjectsToCloud(projects) {
     if (!isAuthorized()) {
       alert("🛑 [경고] 인증되지 않은 상태에서는 저장, 수정, 삭제가 불가능합니다. 우측 상단의 [GUEST 🔒] 배지를 눌러 먼저 인증해 주세요.");
@@ -166,7 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAdminList();
   }
 
-  // 이미지 압축 헬퍼
   function compressAndConvertToBase64(file, maxWidth = 800, quality = 0.8) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -199,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 목록 렌더링
+  // 3. 관리자 목록 출력 & DELETE 버튼 2단계 확인
   function renderAdminList() {
     const listEl = document.getElementById('admin-projects-list');
     if (!listEl) return;
@@ -211,9 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     projectsCache.forEach((proj, idx) => {
-      let statusBg = '#c84b29';
-      if (proj.status === 'COMPLETED') statusBg = '#2d6a4f';
-      if (proj.status === 'DROPPED') statusBg = '#6c757d';
+      let statusBg = 'var(--accent-inprogress, #b85d19)'; // IN PROGRESS (눈이 편안한 브라운)
+      if (proj.status === 'COMPLETED') statusBg = 'var(--accent-green, #2d6a4f)';
+      if (proj.status === 'DROPPED') statusBg = 'var(--accent-gray, #6c757d)';
 
       const item = document.createElement('div');
       item.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border-subtle, #d8d2c6);";
@@ -229,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         <div style="display: flex; gap: 6px; flex-shrink: 0;">
           <a href="edit.html?id=${proj.id}" class="edit-link btn btn-primary" style="padding: 6px 12px; font-size: 0.75rem;">✏️ EDIT</a>
-          <button type="button" class="delete-btn btn" data-index="${idx}" style="padding: 6px 12px; font-size: 0.75rem; background: var(--accent-orange, #c84b29); color: #fff;">🗑 DELETE</button>
+          <button type="button" class="delete-btn btn" data-index="${idx}" data-confirm="false" style="padding: 6px 12px; font-size: 0.75rem; background: var(--accent-orange, #a84325); color: #fff;">🗑 DELETE</button>
         </div>
       `;
       listEl.appendChild(item);
@@ -244,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
+    // 🗑 DELETE 버튼 2단계 안전 삭제 확인
     listEl.querySelectorAll('.delete-btn').forEach(btn => {
       btn.addEventListener('click', async function() {
         if (!isAuthorized()) {
@@ -251,16 +248,38 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
+        const isConfirmed = this.getAttribute('data-confirm') === 'true';
         const index = parseInt(this.getAttribute('data-index'), 10);
-        if (confirm('이 프로젝트를 삭제하고 Gist 클라우드에 반영하시겠습니까?')) {
-          projectsCache.splice(index, 1);
-          await saveProjectsToCloud(projectsCache);
+
+        // 1단계: 정말 삭제할지 1차 전환
+        if (!isConfirmed) {
+          this.setAttribute('data-confirm', 'true');
+          this.innerText = "❓ 정말 삭제?";
+          this.style.background = "#8c2e14"; // 살짝 더 딥한 경고 색상
+
+          // 4초 내에 누르지 않으면 원래 상태로 복원
+          setTimeout(() => {
+            if (this && !this.disabled) {
+              this.setAttribute('data-confirm', 'false');
+              this.innerText = "🗑 DELETE";
+              this.style.background = "var(--accent-orange, #a84325)";
+            }
+          }, 4000);
+          return;
         }
+
+        // 2단계: 실제 삭제 수행 (버튼 비활성화)
+        this.disabled = true;
+        this.innerText = "⏳ 삭제 중...";
+        this.style.background = "var(--accent-gray, #6c757d)";
+
+        projectsCache.splice(index, 1);
+        await saveProjectsToCloud(projectsCache);
       });
     });
   }
 
-  // 3. ➕ 신규 프로젝트 등록 (2단계 저장 및 중복 방지)
+  // 4. ➕ 신규 프로젝트 등록 (2단계 확인 및 눈이 편한 차분한 색상 적용)
   const formEl = document.getElementById('project-form');
   if (formEl) {
     const submitBtn = formEl.querySelector('button[type="submit"]');
@@ -273,11 +292,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // 1단계: 정말 저장할지 확인
       if (!adminSaveConfirmState) {
         adminSaveConfirmState = true;
         submitBtn.innerText = "❓ 정말 저장하시겠습니까?";
-        submitBtn.style.background = "var(--accent-orange, #c84b29)";
+        submitBtn.style.background = "var(--accent-orange, #a84325)"; // 차분한 테라코타 색상
         
         setTimeout(() => {
           if (adminSaveConfirmState && !submitBtn.disabled) {
@@ -289,7 +307,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // 2단계: 저장 진행 (버튼 비활성화)
       submitBtn.disabled = true;
       submitBtn.innerText = "⏳ 저장 중...";
       submitBtn.style.background = "var(--accent-gray, #6c757d)";
@@ -337,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // JSON 백업 내보내기
+  // JSON 백업
   const exportBtn = document.getElementById('export-json-btn');
   if (exportBtn) {
     exportBtn.addEventListener('click', function() {
