@@ -55,10 +55,33 @@
       <aside class="sidebar-column">
         <section class="sidebar-widget">
           <h4>ABOUT THE GAZETTE</h4>
+          
           <p class="excerpt">
             Welcome to the personal project archive. Built with static HTML/JS and powered dynamically via GitHub Gist backend.
           </p>
         </section>
+        <!-- 📊 신문 발행 및 방문자 통계 위젯 -->
+        <section class="sidebar-widget">
+          <h4>CIRCULATION STATS</h4>
+          <div class="circulation-box">
+            <div class="circulation-grid">
+              <div>
+                <span class="circulation-label">TODAY READERS</span>
+                <strong id="stat-daily" class="circulation-value circulation-value-daily">--</strong>
+              </div>
+              <div class="circulation-divider"></div>
+              <div>
+                <span class="circulation-label">TOTAL READERS</span>
+                <strong id="stat-total" class="circulation-value circulation-value-total">--</strong>
+              </div>
+            </div>
+            <small class="circulation-notice">
+              📰 Daily reset at midnight (KST)
+            </small>
+          </div>
+        </section>
+
+        <hr class="divider">
 
         <hr class="divider">
 
