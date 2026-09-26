@@ -1,6 +1,3 @@
-// 🔑 GIST_ID 설정
-const GIST_ID = "d584cff9f66dc32942cef6c3389befd2";
-
 document.addEventListener('DOMContentLoaded', () => {
   let allProjects = [];
 
@@ -9,14 +6,51 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusFilter = document.getElementById('status-filter');
   const searchInput = document.getElementById('search-input');
 
-  // 1. 태그 옵션 동적 생성 함수 (안전 모드)
+  // Gist ID 가져오기 (auth-guard 전역 객체 우선 참조)
+  function getGistId() {
+    if (window.GazetteAuth && window.GazetteAuth.getGistId) {
+      const id = window.GazetteAuth.getGistId();
+      if (id && id !== "본인의_32자리_GIST_ID") return id;
+    }
+    return "본인의_32자리_GIST_ID"; // 백업 Gist ID
+  }
+
+  // 1. 📊 Daily / Total 방문자 카운터
+  function trackVisitorStats() {
+    const todayStr = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+    const lastVisitDate = localStorage.getItem('gazette_last_visit_date');
+    
+    let dailyCount = parseInt(localStorage.getItem('gazette_daily_views') || '0', 10);
+    let totalCount = parseInt(localStorage.getItem('gazette_total_views') || '0', 10);
+
+    // 날짜 변경 시 오늘 카운트 초기화
+    if (lastVisitDate !== todayStr) {
+      dailyCount = 0;
+      localStorage.setItem('gazette_last_visit_date', todayStr);
+    }
+
+    // 신규 세션 방문 시 +1
+    if (!sessionStorage.getItem('gazette_counted_session')) {
+      dailyCount += 1;
+      totalCount += 1;
+      
+      localStorage.setItem('gazette_daily_views', dailyCount);
+      localStorage.setItem('gazette_total_views', totalCount);
+      sessionStorage.setItem('gazette_counted_session', 'true');
+    }
+
+    const dailyEl = document.getElementById('stat-daily');
+    const totalEl = document.getElementById('stat-total');
+
+    if (dailyEl) dailyEl.innerText = dailyCount.toLocaleString();
+    if (totalEl) totalEl.innerText = totalCount.toLocaleString();
+  }
+
+  // 2. 태그 드롭다운 동적 생성
   function populateTagOptions(projects) {
     if (!tagFilter) return;
 
-    // 현재 사용자가 선택하고 있던 값 백업
     const currentValue = tagFilter.value || 'ALL';
-
-    // 중복 제거용 집합
     const tagsSet = new Set();
 
     projects.forEach(p => {
@@ -25,10 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // 드롭다운 초기화
     tagFilter.innerHTML = '<option value="ALL">ALL TAGS</option>';
 
-    // 태그 알파벳순 정렬 후 추가
     Array.from(tagsSet).sort().forEach(tag => {
       const option = document.createElement('option');
       option.value = tag;
@@ -36,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
       tagFilter.appendChild(option);
     });
 
-    // 이전에 선택했던 값이 새로 만든 옵션 목록에 있으면 복원
     if (Array.from(tagFilter.options).some(opt => opt.value === currentValue)) {
       tagFilter.value = currentValue;
     } else {
@@ -44,13 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 2. 카드 렌더링 함수
+  // 3. 프로젝트 카드 목록 출력
   function renderProjects(projects) {
     if (!projectsContainer) return;
     projectsContainer.innerHTML = '';
 
-    if (projects.length === 0) {
-      projectsContainer.innerHTML = '<p class="form-help-text" style="padding: 30px 0; text-align: center; width: 100%;">조건에 맞는 프로젝트가 없습니다.</p>';
+    if (!projects || projects.length === 0) {
+      projectsContainer.innerHTML = '<p class="form-help-text" style="padding: 30px 0; text-align: center; width: 100%;">등록된 프로젝트가 없거나 불러오는 중입니다.</p>';
       return;
     }
 
@@ -64,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
       card.className = 'project-card';
       
       const imgHtml = proj.image 
-        ? `<img src="${proj.image}" alt="${proj.title}" style="width:100%; height:180px; object-fit:cover; filter:sepia(10%); margin-bottom:0.8rem;">`
+        ? `<img src="${proj.image}" alt="${proj.title}">`
         : `<div class="placeholder-icon">📰</div>`;
 
       card.innerHTML = `
@@ -92,22 +123,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3. 필터링 로직 (유연한 비교)
+  // 4. 필터링 로직
   function applyFilters() {
     const selectedTag = tagFilter ? tagFilter.value.toUpperCase() : 'ALL';
     const selectedStatus = statusFilter ? statusFilter.value.toUpperCase() : 'ALL';
     const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
     const filtered = allProjects.filter(proj => {
-      // 태그 필터
       const projTag = String(proj.badgeTag || '').trim().toUpperCase();
       const matchTag = (selectedTag === 'ALL') || (projTag === selectedTag);
 
-      // 상태 필터
       const projStatus = String(proj.status || 'IN PROGRESS').trim().toUpperCase();
       const matchStatus = (selectedStatus === 'ALL') || (projStatus === selectedStatus);
 
-      // 검색 필터
       const matchQuery = !query || 
         String(proj.title || '').toLowerCase().includes(query) ||
         String(proj.headline || '').toLowerCase().includes(query) ||
@@ -120,9 +148,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProjects(filtered);
   }
 
-  // 4. 데이터 로드
+  // 5. 프로젝트 데이터 가져오기 (안전 처리)
   function loadProjectsData() {
-    // 1) 로컬 캐시 즉시 반영
+    // 1) 로컬 캐시 우선 출력
     const saved = localStorage.getItem('gazette_projects');
     if (saved) {
       try {
@@ -130,12 +158,18 @@ document.addEventListener('DOMContentLoaded', () => {
         populateTagOptions(allProjects);
         applyFilters();
       } catch (e) {
-        console.warn("Cache parse error:", e);
+        console.warn("Local storage parse error:", e);
       }
     }
 
-    // 2) Gist 클라우드 동기화
-    fetch(`https://api.github.com/gists/${GIST_ID}`, {
+    const gistId = getGistId();
+    if (!gistId || gistId === "본인의_32자리_GIST_ID") {
+      console.warn("Gist ID가 바르게 설정되지 않았습니다.");
+      return;
+    }
+
+    // 2) Gist 클라우드 읽기 (토큰 없이 공개 GET 가능)
+    fetch(`https://api.github.com/gists/${gistId}`, {
       headers: { 'Accept': 'application/vnd.github.v3+json' }
     })
       .then(res => res.ok ? res.json() : null)
@@ -146,13 +180,13 @@ document.addEventListener('DOMContentLoaded', () => {
           allProjects = JSON.parse(fileContent);
           localStorage.setItem('gazette_projects', fileContent);
           populateTagOptions(allProjects);
-          applyFilters(); // 필터 재적용
+          applyFilters();
         }
       })
       .catch(err => console.warn("Gist fetch failed:", err));
   }
 
-  // 5. 이벤트 등록 ('change' 및 'input' 이벤트 모두 등록)
+  // 이벤트 연결
   if (tagFilter) tagFilter.addEventListener('change', applyFilters);
   if (statusFilter) statusFilter.addEventListener('change', applyFilters);
   if (searchInput) {
@@ -160,39 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('keyup', applyFilters);
   }
 
+  // 실행
+  trackVisitorStats();
   loadProjectsData();
 });
-// 📊 Daily / Total 방문자 카운터 로직
-  function trackVisitorStats() {
-    const todayStr = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-    const lastVisitDate = localStorage.getItem('gazette_last_visit_date');
-    
-    let dailyCount = parseInt(localStorage.getItem('gazette_daily_views') || '0', 10);
-    let totalCount = parseInt(localStorage.getItem('gazette_total_views') || '0', 10);
-
-    // 날짜가 변경되었으면 오늘 방문자 수 0으로 초기화
-    if (lastVisitDate !== todayStr) {
-      dailyCount = 0;
-      localStorage.setItem('gazette_last_visit_date', todayStr);
-    }
-
-    // 이번 세션에서 오늘 처음 방문한 경우 카운트 +1
-    if (!sessionStorage.getItem('gazette_counted_session')) {
-      dailyCount += 1;
-      totalCount += 1;
-      
-      localStorage.setItem('gazette_daily_views', dailyCount);
-      localStorage.setItem('gazette_total_views', totalCount);
-      sessionStorage.setItem('gazette_counted_session', 'true');
-    }
-
-    // UI에 반영
-    const dailyEl = document.getElementById('stat-daily');
-    const totalEl = document.getElementById('stat-total');
-
-    if (dailyEl) dailyEl.innerText = dailyCount.toLocaleString();
-    if (totalEl) totalEl.innerText = totalCount.toLocaleString();
-  }
-
-  // 페이지 데이터 로드 시 방문자 카운터 실행
-  trackVisitorStats();
