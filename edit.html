@@ -22,18 +22,18 @@
     <main class="edit-main">
       <section class="edit-card">
         <form id="edit-project-form">
-          <!-- 1. 메인 타이틀 -->
+          <!-- 1. 기사 타이틀 -->
           <div class="form-group">
             <label for="p-title" class="form-label">Article Title</label>
             <input type="text" id="p-title" class="form-input" required placeholder="프로젝트 제목">
           </div>
 
-          <!-- 2. 상단 중요 정보 가로 그리드 바 -->
-          <div style="background: var(--bg-color); border: 1px solid var(--border-color); padding: 15px; margin-bottom: 20px;">
-            <span style="font-size: 0.7rem; font-weight: bold; letter-spacing: 0.05rem; color: var(--accent-orange); display: block; margin-bottom: 10px;">📌 QUICK META EDIT</span>
+          <!-- 2. 상단 중요 정보 가로 그리드 박스 -->
+          <div class="quick-meta-box">
+            <span class="quick-meta-title">📌 QUICK META EDIT</span>
             
-            <div class="form-grid-2" style="margin-bottom: 10px;">
-              <div class="form-group" style="margin-bottom: 0;">
+            <div class="form-grid-2">
+              <div class="form-group grid-mb-clear">
                 <label for="p-status" class="form-label">Status</label>
                 <select id="p-status" class="form-select">
                   <option value="IN PROGRESS">IN PROGRESS (진행중)</option>
@@ -42,19 +42,19 @@
                 </select>
               </div>
 
-              <div class="form-group" style="margin-bottom: 0;">
+              <div class="form-group grid-mb-clear">
                 <label for="p-tag" class="form-label">Badge Tag</label>
                 <input type="text" id="p-tag" class="form-input" placeholder="예: BRANDING, WEB">
               </div>
             </div>
 
-            <div class="form-grid-2" style="margin-bottom: 0;">
-              <div class="form-group" style="margin-bottom: 0;">
+            <div class="form-grid-2 grid-mb-clear">
+              <div class="form-group grid-mb-clear">
                 <label for="p-author" class="form-label">Author / Byline</label>
                 <input type="text" id="p-author" class="form-input" placeholder="by Author Name">
               </div>
 
-              <div class="form-group" style="margin-bottom: 0;">
+              <div class="form-group grid-mb-clear">
                 <label for="p-date" class="form-label">Publication Date</label>
                 <input type="text" id="p-date" class="form-input" placeholder="Sep 26, 2026">
               </div>
@@ -67,47 +67,47 @@
             <input type="text" id="p-headline" class="form-input" required placeholder="기사 한 줄 요약 헤드라인">
           </div>
 
-          <!-- 4. 이미지 변경 -->
+          <!-- 4. 커버 이미지 변경 -->
           <div class="form-group">
             <label for="p-image-file" class="form-label">Update Cover Image (Optional)</label>
-            <div class="image-preview-container" style="margin-bottom: 8px;">
-              <img id="preview-image" class="image-preview" src="" alt="Current Image" style="display:none; max-height: 120px; object-fit: cover;">
+            <div class="image-preview-container">
+              <img id="preview-image" class="image-preview" src="" alt="Current Image">
             </div>
             <input type="file" id="p-image-file" class="form-file-input" accept="image/*">
             <small class="form-help-text">새 이미지를 첨부하지 않으면 기존 이미지가 유지됩니다.</small>
           </div>
 
           <!-- 5. 📝 마크다운 에디터 & 라이브 프리뷰 영역 -->
-          <div class="form-group" style="margin-top: 25px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <label for="p-summary" class="form-label" style="margin: 0;">Summary & Article Body (Markdown)</label>
+          <div class="form-group">
+            <div class="editor-header-bar">
+              <label for="p-summary" class="form-label">Summary & Article Body (Markdown)</label>
               
               <!-- 탭 버튼 -->
-              <div style="display: flex; gap: 4px;">
-                <button type="button" id="btn-mode-write" class="btn btn-secondary" style="padding: 3px 10px; font-size: 0.7rem; background: var(--text-main); color: var(--bg-color);">✍️ Write</button>
-                <button type="button" id="btn-mode-preview" class="btn btn-secondary" style="padding: 3px 10px; font-size: 0.7rem;">👁️ Preview</button>
+              <div class="editor-mode-tabs">
+                <button type="button" id="btn-mode-write" class="btn btn-tab btn-tab-active">✍️ Write</button>
+                <button type="button" id="btn-mode-preview" class="btn btn-tab btn-tab-inactive">👁️ Preview</button>
               </div>
             </div>
 
             <!-- 마크다운 툴바 -->
-            <div id="md-toolbar" style="display: flex; gap: 4px; flex-wrap: wrap; background: var(--bg-card); border: 1px solid var(--border-color); border-bottom: none; padding: 6px;">
-              <button type="button" class="btn" data-md="bold" style="padding: 2px 8px; font-size: 0.75rem;" title="Bold"><b>B</b></button>
-              <button type="button" class="btn" data-md="italic" style="padding: 2px 8px; font-size: 0.75rem;" title="Italic"><i>I</i></button>
-              <button type="button" class="btn" data-md="h1" style="padding: 2px 8px; font-size: 0.75rem;" title="Header 1">H1</button>
-              <button type="button" class="btn" data-md="h2" style="padding: 2px 8px; font-size: 0.75rem;" title="Header 2">H2</button>
-              <button type="button" class="btn" data-md="quote" style="padding: 2px 8px; font-size: 0.75rem;" title="Quote">”</button>
-              <button type="button" class="btn" data-md="list" style="padding: 2px 8px; font-size: 0.75rem;" title="List">• List</button>
-              <button type="button" class="btn" data-md="link" style="padding: 2px 8px; font-size: 0.75rem;" title="Link">🔗 Link</button>
+            <div id="md-toolbar" class="md-toolbar">
+              <button type="button" class="btn md-toolbar-btn" data-md="bold" title="Bold"><b>B</b></button>
+              <button type="button" class="btn md-toolbar-btn" data-md="italic" title="Italic"><i>I</i></button>
+              <button type="button" class="btn md-toolbar-btn" data-md="h1" title="Header 1">H1</button>
+              <button type="button" class="btn md-toolbar-btn" data-md="h2" title="Header 2">H2</button>
+              <button type="button" class="btn md-toolbar-btn" data-md="quote" title="Quote">”</button>
+              <button type="button" class="btn md-toolbar-btn" data-md="list" title="List">• List</button>
+              <button type="button" class="btn md-toolbar-btn" data-md="link" title="Link">🔗 Link</button>
             </div>
 
-            <!-- 에디터 입력창 -->
-            <textarea id="p-summary" class="form-textarea" rows="12" required placeholder="마크다운 문법으로 기사 내용을 작성하세요..." style="border-top-left-radius: 0; border-top-right-radius: 0;"></textarea>
+            <!-- 본문 입력창 -->
+            <textarea id="p-summary" class="form-textarea md-textarea" rows="12" required placeholder="마크다운 문법으로 기사 내용을 작성하세요..."></textarea>
 
-            <!-- 라이브 프리뷰 창 (초기 숨김) -->
-            <div id="md-preview" style="display: none; min-height: 250px; background: var(--bg-card); border: 1px solid var(--border-color); padding: 15px; font-family: 'Source Serif 4', Georgia, serif; line-height: 1.7;"></div>
+            <!-- 라이브 프리뷰 창 -->
+            <div id="md-preview" class="md-preview-box"></div>
           </div>
 
-          <div class="form-btn-group" style="margin-top: 25px;">
+          <div class="form-btn-group">
             <button type="submit" class="btn btn-primary">💾 Save Changes</button>
             <a href="admin.html" class="btn btn-secondary">Cancel</a>
           </div>
