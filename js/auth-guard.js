@@ -29,7 +29,6 @@ window.GazetteAuth = {
     sessionStorage.removeItem('gazette_temp_token');
     if (window.GazetteAuth.onAuthChange) window.GazetteAuth.onAuthChange(false);
     
-    // 💡 로그아웃 호출 시 UI 즉시 리셋 처리
     if (typeof updateWidgetUI === 'function') {
       updateWidgetUI();
     }
@@ -45,11 +44,12 @@ window.GazetteAuth = {
   }
 })();
 
-// 위젯 UI 업데이트 전역 선언
+// 위젯 UI 업데이트 전역 선언 (동적 ADMIN PANEL 버튼 제어)
 function updateWidgetUI() {
   const statusDot = document.getElementById('widget-status-dot');
   const statusText = document.getElementById('widget-status-text');
   const timerText = document.getElementById('widget-timer-text');
+  const adminBtn = document.getElementById('widget-admin-btn');
 
   if (!statusDot || !statusText || !timerText) return;
 
@@ -58,10 +58,12 @@ function updateWidgetUI() {
     statusDot.style.background = 'var(--accent-green, #2d6a4f)';
     statusText.innerText = 'PRESS 🔓';
     timerText.style.display = 'inline';
+    if (adminBtn) adminBtn.style.display = 'block'; // 🔓 인증 성공 시 버튼 노출
   } else {
     statusDot.style.background = 'var(--accent-orange, #a84325)';
     statusText.innerText = 'GUEST 🔒';
     timerText.style.display = 'none';
+    if (adminBtn) adminBtn.style.display = 'none'; // 🔒 미인증 시 버튼 숨김
     if (typeof stopTimer === 'function') stopTimer();
   }
 }
@@ -74,7 +76,7 @@ function stopTimer() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. 우측 상단 패널 DOM 생성
+  // 1. 우측 상단 통합 컨트롤 패널 DOM 생성 (세로 정렬 지원)
   const widgetContainer = document.createElement('div');
   widgetContainer.id = 'gazette-auth-widget';
   widgetContainer.style.cssText = `
@@ -83,41 +85,64 @@ document.addEventListener('DOMContentLoaded', () => {
     right: 15px;
     z-index: 9999;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-end;
     gap: 6px;
-    background: var(--bg-card, #faf6f0);
-    border: 1.5px solid var(--border-color, #1a1a1a);
-    padding: 4px 8px;
-    border-radius: 20px;
-    font-family: sans-serif;
-    font-size: 0.7rem;
-    font-weight: bold;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
     user-select: none;
-    transition: transform 0.2s ease;
   `;
 
   widgetContainer.innerHTML = `
-    <button type="button" id="widget-theme-toggle" style="
-      background: transparent;
-      border: none;
-      border-right: 1px solid var(--border-subtle, #ccc);
-      padding-right: 6px;
-      margin-right: 2px;
-      cursor: pointer;
-      font-size: 0.7rem;
-      font-weight: bold;
-      color: var(--text-main, #1a1a1a);
+    <!-- 상단 알약 패널 (테마 + 토큰 인증 상태) -->
+    <div style="
       display: flex;
       align-items: center;
-      gap: 3px;
-    ">🌙 NIGHT</button>
+      gap: 6px;
+      background: var(--bg-card, #faf6f0);
+      border: 1.5px solid var(--border-color, #1a1a1a);
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-family: sans-serif;
+      font-size: 0.7rem;
+      font-weight: bold;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    ">
+      <button type="button" id="widget-theme-toggle" style="
+        background: transparent;
+        border: none;
+        border-right: 1px solid var(--border-subtle, #ccc);
+        padding-right: 6px;
+        margin-right: 2px;
+        cursor: pointer;
+        font-size: 0.7rem;
+        font-weight: bold;
+        color: var(--text-main, #1a1a1a);
+        display: flex;
+        align-items: center;
+        gap: 3px;
+      ">🌙 NIGHT</button>
 
-    <div id="widget-auth-btn" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-      <span id="widget-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-orange, #a84325);"></span>
-      <span id="widget-status-text" style="color: var(--text-main, #1a1a1a);">GUEST 🔒</span>
-      <span id="widget-timer-text" style="color: var(--text-muted, #666); font-weight: normal; display: none;">(10:00)</span>
+      <div id="widget-auth-btn" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+        <span id="widget-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-orange, #a84325);"></span>
+        <span id="widget-status-text" style="color: var(--text-main, #1a1a1a);">GUEST 🔒</span>
+        <span id="widget-timer-text" style="color: var(--text-muted, #666); font-weight: normal; display: none;">(10:00)</span>
+      </div>
     </div>
+
+    <!-- 하단 동적 ADMIN PANEL 바로가기 버튼 -->
+    <a href="admin.html" id="widget-admin-btn" style="
+      display: none;
+      background: var(--text-main, #1a1a1a);
+      color: var(--bg-color, #f2efe9);
+      border: 1px solid var(--border-color, #1a1a1a);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-family: sans-serif;
+      font-size: 0.65rem;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transition: transform 0.15 ease;
+    ">⚙️ ADMIN PANEL &rarr;</a>
   `;
 
   document.body.appendChild(widgetContainer);
