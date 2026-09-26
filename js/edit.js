@@ -6,6 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let projectsCache = [];
   let currentProjectIndex = -1;
 
+  const summaryInput = document.getElementById('p-summary');
+  const previewDiv = document.getElementById('md-preview');
+  const mdToolbar = document.getElementById('md-toolbar');
+  const btnWrite = document.getElementById('btn-mode-write');
+  const btnPreview = document.getElementById('btn-mode-preview');
+
   function isAuthorized() {
     return window.GazetteAuth && window.GazetteAuth.isAuthorized();
   }
@@ -18,68 +24,73 @@ document.addEventListener('DOMContentLoaded', () => {
     return window.GazetteAuth ? window.GazetteAuth.getToken() : "";
   }
 
-  // 1. 프로젝트 데이터 가져온 후 수정 폼에 기존 값 채우기
-  async function loadProjectData() {
-    const saved = localStorage.getItem('gazette_projects');
-    if (saved) {
-      try {
-        projectsCache = JSON.parse(saved);
-      } catch (e) {
-        console.error("Local storage parse error:", e);
-      }
-    }
-
-    // Gist에서 최신 데이터가 있으면 동기화
-    if (isAuthorized()) {
-      try {
-        const res = await fetch(`https://api.github.com/gists/${getGistId()}`, {
-          headers: {
-            'Authorization': `token ${getToken()}`,
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        });
-
-        if (res.ok) {
-          const gistData = await res.json();
-          const fileContent = gistData.files['projects.json']?.content;
-          if (fileContent) {
-            projectsCache = JSON.parse(fileContent);
-            localStorage.setItem('gazette_projects', fileContent);
-          }
-        }
-      } catch (e) {
-        console.warn("Gist fetch failed in edit page:", e);
-      }
-    }
-
-    // ID에 해당하는 프로젝트 찾기
-    currentProjectIndex = projectsCache.findIndex(p => p.id === projectId);
-
-    if (currentProjectIndex === -1) {
-      alert("⚠️ 해당 프로젝트를 찾을 수 없습니다.");
-      window.location.href = "admin.html";
-      return;
-    }
-
-    // 📝 기존 글 데이터를 폼에 자동으로 채워넣기 (Pre-fill)
-    const target = projectsCache[currentProjectIndex];
-    
-    if (document.getElementById('p-title')) document.getElementById('p-title').value = target.title || '';
-    if (document.getElementById('p-status')) document.getElementById('p-status').value = target.status || 'IN PROGRESS';
-    if (document.getElementById('p-tag')) document.getElementById('p-tag').value = target.badgeTag || '';
-    if (document.getElementById('p-headline')) document.getElementById('p-headline').value = target.headline || '';
-    if (document.getElementById('p-author')) document.getElementById('p-author').value = target.author || '';
-    if (document.getElementById('p-summary')) document.getElementById('p-summary').value = target.summary || '';
-
-    // 기존 미리보기 이미지 표시
-    const previewImg = document.getElementById('preview-image');
-    if (previewImg && target.image) {
-      previewImg.src = target.image;
-      previewImg.style.display = 'block';
-    }
+  // 간단한 마크다운 -> HTML 변환 파서
+  function parseMarkdown(text) {
+    if (!text) return '';
+    let html = text;
+    html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+    html = html.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
+    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+    html = html.replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" target="_blank">$1</a>');
+    html = html.replace(/^\- (.*$)/gim, '• $1<br>');
+    return html.replace(/\n/g, '<br>');
   }
 
-  // 이미지 압축 헬퍼
+  // 1. 마크다운 툴바 버튼 클릭 이벤트
+  if (mdToolbar) {
+    mdToolbar.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn || !summaryInput) return;
+
+      const action = btn.getAttribute('data-md');
+      const start = summaryInput.selectionStart;
+      const end = summaryInput.selectionEnd;
+      const selectedText = summaryInput.value.substring(start, end);
+      let replacement = '';
+
+      switch (action) {
+        case 'bold': replacement = `**${selectedText || 'bold text'}**`; break;
+        case 'italic': replacement = `*${selectedText || 'italic text'}*`; break;
+        case 'h1': replacement = `\n# ${selectedText || 'Header 1'}\n`; break;
+        case 'h2': replacement = `\n## ${selectedText || 'Header 2'}\n`; break;
+        case 'quote': replacement = `\n> ${selectedText || 'Quote text'}\n`; break;
+        case 'list': replacement = `\n- ${selectedText || 'List item'}\n`; break;
+        case 'link': replacement = `[${selectedText || 'Link text'}](https://example.com)`; break;
+      }
+
+      summaryInput.setRangeText(replacement, start, end, 'select');
+      summaryInput.focus();
+    });
+  }
+
+  // 2. 탭 전환 (Write / Live Preview)
+  if (btnWrite && btnPreview) {
+    btnWrite.addEventListener('click', () => {
+      summaryInput.style.display = 'block';
+      if (mdToolbar) mdToolbar.style.display = 'flex';
+      previewDiv.style.display = 'none';
+      btnWrite.classList.add('btn-tab-active');
+      btnWrite.classList.remove('btn-tab-inactive');
+      btnPreview.classList.add('btn-tab-inactive');
+      btnPreview.classList.remove('btn-tab-active');
+    });
+
+    btnPreview.addEventListener('click', () => {
+      previewDiv.innerHTML = parseMarkdown(summaryInput.value);
+      summaryInput.style.display = 'none';
+      if (mdToolbar) mdToolbar.style.display = 'none';
+      previewDiv.style.display = 'block';
+      btnPreview.classList.add('btn-tab-active');
+      btnPreview.classList.remove('btn-tab-inactive');
+      btnWrite.classList.add('btn-tab-inactive');
+      btnWrite.classList.remove('btn-tab-active');
+    });
+  }
+
+  // 3. 이미지 파일 Base64 압축 변환 헬퍼
   function compressAndConvertToBase64(file, maxWidth = 800, quality = 0.8) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -112,7 +123,65 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 2. 수정 완료 버튼 저장 처리
+  // 4. 기존 프로젝트 데이터 로드 및 폼 자동 작성 (Pre-fill)
+  async function loadProjectData() {
+    const saved = localStorage.getItem('gazette_projects');
+    if (saved) {
+      try {
+        projectsCache = JSON.parse(saved);
+      } catch (e) {
+        console.error("Local storage parse error:", e);
+      }
+    }
+
+    if (isAuthorized()) {
+      try {
+        const res = await fetch(`https://api.github.com/gists/${getGistId()}`, {
+          headers: {
+            'Authorization': `token ${getToken()}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+
+        if (res.ok) {
+          const gistData = await res.json();
+          const fileContent = gistData.files['projects.json']?.content;
+          if (fileContent) {
+            projectsCache = JSON.parse(fileContent);
+            localStorage.setItem('gazette_projects', fileContent);
+          }
+        }
+      } catch (e) {
+        console.warn("Gist fetch failed in edit page:", e);
+      }
+    }
+
+    currentProjectIndex = projectsCache.findIndex(p => p.id === projectId);
+
+    if (currentProjectIndex === -1) {
+      alert("⚠️ 해당 프로젝트를 찾을 수 없습니다.");
+      window.location.href = "admin.html";
+      return;
+    }
+
+    const target = projectsCache[currentProjectIndex];
+
+    if (document.getElementById('p-title')) document.getElementById('p-title').value = target.title || '';
+    if (document.getElementById('p-status')) document.getElementById('p-status').value = target.status || 'IN PROGRESS';
+    if (document.getElementById('p-tag')) document.getElementById('p-tag').value = target.badgeTag || '';
+    if (document.getElementById('p-author')) document.getElementById('p-author').value = target.author || '';
+    if (document.getElementById('p-date')) document.getElementById('p-date').value = target.date || '';
+    if (document.getElementById('p-headline')) document.getElementById('p-headline').value = target.headline || '';
+    if (summaryInput) summaryInput.value = target.summary || '';
+
+    const previewImg = document.getElementById('preview-image');
+    if (previewImg && target.image) {
+      previewImg.src = target.image;
+      previewImg.style.display = 'block';
+    }
+  }
+
+  // 5. 수정 사항 저장 이벤트 처리
   const formEl = document.getElementById('edit-project-form');
   if (formEl) {
     formEl.addEventListener('submit', async function(e) {
@@ -126,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentProjectIndex === -1) return;
 
       const fileInput = document.getElementById('p-image-file');
-      let base64Image = projectsCache[currentProjectIndex].image; // 기존 이미지 유지
+      let base64Image = projectsCache[currentProjectIndex].image;
 
       if (fileInput && fileInput.files.length > 0) {
         try {
@@ -136,19 +205,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 수정 데이터 반영
       projectsCache[currentProjectIndex] = {
         ...projectsCache[currentProjectIndex],
         title: document.getElementById('p-title').value,
         status: document.getElementById('p-status').value,
         badgeTag: document.getElementById('p-tag').value || 'PROJECT',
-        headline: document.getElementById('p-headline').value,
         author: document.getElementById('p-author').value,
+        date: document.getElementById('p-date').value,
+        headline: document.getElementById('p-headline').value,
         image: base64Image,
-        summary: document.getElementById('p-summary').value
+        summary: summaryInput.value
       };
 
-      // 로컬 스토리지 & Gist 클라우드 업데이트
       localStorage.setItem('gazette_projects', JSON.stringify(projectsCache, null, 2));
 
       try {
