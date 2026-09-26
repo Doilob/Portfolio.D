@@ -775,3 +775,56 @@ body {
     grid-template-columns: 1fr;
   }
 }
+/* ==========================================
+   Circulation Stats Widget (방문자 통계)
+   ========================================== */
+.circulation-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  font-family: sans-serif;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.circulation-grid {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.circulation-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  display: block;
+  font-weight: bold;
+  letter-spacing: 0.05rem;
+}
+
+.circulation-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+}
+
+.circulation-value-daily {
+  color: var(--accent-orange, #c84b29);
+}
+
+.circulation-value-total {
+  color: var(--text-main, #1a1a1a);
+}
+
+.circulation-divider {
+  width: 1px;
+  height: 30px;
+  background: var(--border-subtle, #ccc);
+}
+
+.circulation-notice {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 8px;
+  border-top: 1px dashed var(--border-subtle, #ccc);
+  padding-top: 6px;
+}
