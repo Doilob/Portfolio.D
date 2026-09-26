@@ -6,7 +6,7 @@ let GITHUB_TOKEN = sessionStorage.getItem('gazette_temp_token') || "";
 let remainingSeconds = INACTIVITY_LIMIT_SECONDS;
 let timerInterval = null;
 
-// window 전역 객체로 공용 인증 메서드 노출
+// window 전역 객체로 공용 인증 및 테마 메서드 노출
 window.GazetteAuth = {
   isAuthorized: () => Boolean(GITHUB_TOKEN && GITHUB_TOKEN.trim().startsWith('ghp_')),
   getToken: () => GITHUB_TOKEN,
@@ -33,8 +33,16 @@ window.GazetteAuth = {
   onAuthChange: null
 };
 
+// 🌙 테마(다크모드) 즉시 초기화 (화면 깜빡임 방지)
+(function initTheme() {
+  const SAVED_THEME = localStorage.getItem('gazette_theme');
+  if (SAVED_THEME === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. 화면 우측 상단 미니 프레스 배지 위젯 동적 삽입
+  // 1. 우측 상단 통합 컨트롤 패널 (인증 + 나이트모드) 생성
   const widgetContainer = document.createElement('div');
   widgetContainer.id = 'gazette-auth-widget';
   widgetContainer.style.cssText = `
@@ -44,42 +52,70 @@ document.addEventListener('DOMContentLoaded', () => {
     z-index: 9999;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     background: var(--bg-card, #faf6f0);
-    border: 1px solid var(--border-color, #1a1a1a);
-    padding: 5px 10px;
+    border: 1.5px solid var(--border-color, #1a1a1a);
+    padding: 4px 8px;
     border-radius: 20px;
     font-family: sans-serif;
     font-size: 0.7rem;
     font-weight: bold;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
     user-select: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease;
   `;
 
   widgetContainer.innerHTML = `
-    <span id="widget-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #c84b29;"></span>
-    <span id="widget-status-text" style="color: var(--text-main, #1a1a1a);">GUEST 🔒</span>
-    <span id="widget-timer-text" style="color: var(--text-muted, #666); font-weight: normal; display: none;">(10:00)</span>
+    <!-- 🌙 나이트모드 토글 버튼 -->
+    <button type="button" id="widget-theme-toggle" style="
+      background: transparent;
+      border: none;
+      border-right: 1px solid var(--border-subtle, #ccc);
+      padding-right: 6px;
+      margin-right: 2px;
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: var(--text-main, #1a1a1a);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    ">🌙 NIGHT</button>
+
+    <!-- 🔒/🔓 보안 인증 배지 영역 -->
+    <div id="widget-auth-btn" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+      <span id="widget-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-orange, #a84325);"></span>
+      <span id="widget-status-text" style="color: var(--text-main, #1a1a1a);">GUEST 🔒</span>
+      <span id="widget-timer-text" style="color: var(--text-muted, #666); font-weight: normal; display: none;">(10:00)</span>
+    </div>
   `;
 
   document.body.appendChild(widgetContainer);
 
+  const themeBtn = document.getElementById('widget-theme-toggle');
+  const authBtn = document.getElementById('widget-auth-btn');
   const statusDot = document.getElementById('widget-status-dot');
   const statusText = document.getElementById('widget-status-text');
   const timerText = document.getElementById('widget-timer-text');
 
-  // 호버 효과
-  widgetContainer.addEventListener('mouseenter', () => {
-    widgetContainer.style.transform = 'scale(1.04)';
-  });
-  widgetContainer.addEventListener('mouseleave', () => {
-    widgetContainer.style.transform = 'scale(1)';
+  // 2. 테마 토글 버튼 클릭 처리
+  function updateThemeBtnUI() {
+    const isDark = document.body.classList.contains('dark-mode');
+    themeBtn.innerHTML = isDark ? '☀️ DAY' : '🌙 NIGHT';
+  }
+
+  updateThemeBtnUI();
+
+  themeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.body.classList.toggle('dark-mode');
+    const isDarkNow = document.body.classList.contains('dark-mode');
+    localStorage.setItem('gazette_theme', isDarkNow ? 'dark' : 'light');
+    updateThemeBtnUI();
   });
 
-  // 위젯 클릭 시 인증 / 해제 팝업
-  widgetContainer.addEventListener('click', async () => {
+  // 3. 인증 배지 클릭 처리
+  authBtn.addEventListener('click', async () => {
     if (window.GazetteAuth.isAuthorized()) {
       if (confirm("🔓 Gist와의 통신을 해제하고 로그아웃하시겠습니까?")) {
         window.GazetteAuth.logout();
@@ -116,15 +152,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 위젯 UI 업데이트
+  // UI 상태 업데이트
   function updateWidgetUI() {
     const authorized = window.GazetteAuth.isAuthorized();
     if (authorized) {
-      statusDot.style.background = '#2d6a4f'; // 녹색
+      statusDot.style.background = 'var(--accent-green, #2d6a4f)';
       statusText.innerText = 'PRESS 🔓';
       timerText.style.display = 'inline';
     } else {
-      statusDot.style.background = '#c84b29'; // 주황색
+      statusDot.style.background = 'var(--accent-orange, #a84325)';
       statusText.innerText = 'GUEST 🔒';
       timerText.style.display = 'none';
       stopTimer();
@@ -168,12 +204,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 상호작용 리셋 이벤트
   ['click', 'mousemove', 'keydown', 'scroll', 'touchstart'].forEach(evt => {
     window.addEventListener(evt, resetTimer, { passive: true });
   });
 
-  // 초기 로드 검증
   async function initCheck() {
     if (GITHUB_TOKEN) {
       const ok = await window.GazetteAuth.testConnection(GITHUB_TOKEN);
