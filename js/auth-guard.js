@@ -28,12 +28,16 @@ window.GazetteAuth = {
     GITHUB_TOKEN = "";
     sessionStorage.removeItem('gazette_temp_token');
     if (window.GazetteAuth.onAuthChange) window.GazetteAuth.onAuthChange(false);
-    updateWidgetUI();
+    
+    // 💡 로그아웃 호출 시 UI 즉시 리셋 처리
+    if (typeof updateWidgetUI === 'function') {
+      updateWidgetUI();
+    }
   },
   onAuthChange: null
 };
 
-// 🌙 테마(다크모드) 즉시 초기화 (화면 깜빡임 방지)
+// 🌙 테마(다크모드) 즉시 초기화
 (function initTheme() {
   const SAVED_THEME = localStorage.getItem('gazette_theme');
   if (SAVED_THEME === 'dark') {
@@ -41,8 +45,36 @@ window.GazetteAuth = {
   }
 })();
 
+// 위젯 UI 업데이트 전역 선언
+function updateWidgetUI() {
+  const statusDot = document.getElementById('widget-status-dot');
+  const statusText = document.getElementById('widget-status-text');
+  const timerText = document.getElementById('widget-timer-text');
+
+  if (!statusDot || !statusText || !timerText) return;
+
+  const authorized = window.GazetteAuth.isAuthorized();
+  if (authorized) {
+    statusDot.style.background = 'var(--accent-green, #2d6a4f)';
+    statusText.innerText = 'PRESS 🔓';
+    timerText.style.display = 'inline';
+  } else {
+    statusDot.style.background = 'var(--accent-orange, #a84325)';
+    statusText.innerText = 'GUEST 🔒';
+    timerText.style.display = 'none';
+    if (typeof stopTimer === 'function') stopTimer();
+  }
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. 우측 상단 통합 컨트롤 패널 (인증 + 나이트모드) 생성
+  // 1. 우측 상단 패널 DOM 생성
   const widgetContainer = document.createElement('div');
   widgetContainer.id = 'gazette-auth-widget';
   widgetContainer.style.cssText = `
@@ -66,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
   `;
 
   widgetContainer.innerHTML = `
-    <!-- 🌙 나이트모드 토글 버튼 -->
     <button type="button" id="widget-theme-toggle" style="
       background: transparent;
       border: none;
@@ -82,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
       gap: 3px;
     ">🌙 NIGHT</button>
 
-    <!-- 🔒/🔓 보안 인증 배지 영역 -->
     <div id="widget-auth-btn" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
       <span id="widget-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-orange, #a84325);"></span>
       <span id="widget-status-text" style="color: var(--text-main, #1a1a1a);">GUEST 🔒</span>
@@ -94,11 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const themeBtn = document.getElementById('widget-theme-toggle');
   const authBtn = document.getElementById('widget-auth-btn');
-  const statusDot = document.getElementById('widget-status-dot');
-  const statusText = document.getElementById('widget-status-text');
-  const timerText = document.getElementById('widget-timer-text');
 
-  // 2. 테마 토글 버튼 클릭 처리
+  // 2. 테마 토글 버튼
   function updateThemeBtnUI() {
     const isDark = document.body.classList.contains('dark-mode');
     themeBtn.innerHTML = isDark ? '☀️ DAY' : '🌙 NIGHT';
@@ -114,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateThemeBtnUI();
   });
 
-  // 3. 인증 배지 클릭 처리
+  // 3. 인증 배지 클릭
   authBtn.addEventListener('click', async () => {
     if (window.GazetteAuth.isAuthorized()) {
       if (confirm("🔓 Gist와의 통신을 해제하고 로그아웃하시겠습니까?")) {
@@ -126,7 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 토큰 입력 및 검증 팝업
   async function promptAuthentication() {
     const inputToken = prompt("🔑 GitHub Personal Access Token (ghp_...)을 입력해 주세요:");
     if (!inputToken) return false;
@@ -152,21 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // UI 상태 업데이트
-  function updateWidgetUI() {
-    const authorized = window.GazetteAuth.isAuthorized();
-    if (authorized) {
-      statusDot.style.background = 'var(--accent-green, #2d6a4f)';
-      statusText.innerText = 'PRESS 🔓';
-      timerText.style.display = 'inline';
-    } else {
-      statusDot.style.background = 'var(--accent-orange, #a84325)';
-      statusText.innerText = 'GUEST 🔒';
-      timerText.style.display = 'none';
-      stopTimer();
-    }
-  }
-
   // 10분 타이머 기능
   function startTimer() {
     stopTimer();
@@ -184,14 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
   }
 
-  function stopTimer() {
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-    }
-  }
-
   function updateTimerText() {
+    const timerText = document.getElementById('widget-timer-text');
+    if (!timerText) return;
     const m = String(Math.floor(remainingSeconds / 60)).padStart(2, '0');
     const s = String(remainingSeconds % 60).padStart(2, '0');
     timerText.innerText = `(${m}:${s})`;
