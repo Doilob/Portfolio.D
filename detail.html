@@ -8,94 +8,66 @@
 </head>
 <body>
   <div class="gazette-container">
-    <!-- 1. 신문식 스타일 상단 헤더 (Journalistic Header) -->
+    <!-- 헤더 -->
     <header class="gazette-header">
       <nav class="top-nav">
-        <a href="index.html" class="back-link">&larr; BACK TO FRONT PAGE ARCHIVE</a>
+        <a href="index.html" class="back-link">&larr; Back to Front Page</a>
+        <a href="admin.html">ADMIN PANEL</a>
       </nav>
       <h1 class="main-title">THE PORTFOLIO GAZETTE</h1>
       <div class="header-meta-bar">
-        <span>VOL. I ... NO. 12</span>
-        <span>SPECIAL FEATURE ARTICLE</span>
-        <span>GAZETTE EDITION</span>
+        <span>FEATURED ARTICLE</span>
+        <span>SPECIAL EDITION</span>
       </div>
     </header>
 
+    <!-- 메인 상세 영역 -->
     <main class="detail-main">
-      <article id="detail-container">
-        <!-- 메타 배지 정보 -->
-        <div class="detail-meta">
-          <span id="detail-tag" class="badge badge-tag-default">TAG</span>
-          <span id="detail-status" class="badge badge-status-default">STATUS</span>
-          <span id="detail-date" class="meta-date">Date</span>
-        </div>
+      <!-- 프로젝트 동적 수록 컨테이너 -->
+      <section id="project-detail-container">
+        <!-- js/detail.js 에서 동적 렌더링 -->
+      </section>
 
-        <!-- 헤드라인 및 저자 -->
-        <h1 id="detail-headline" class="detail-headline">Loading Article...</h1>
-        <p id="detail-author" class="detail-author">by Author</p>
+      <!-- 이전글 / 다음글 동적 네비게이션 영역 -->
+      <section id="article-nav-section" class="article-nav-section">
+      </section>
 
-        <hr class="divider">
-
-        <!-- 메인 대표 이미지 -->
-        <div class="detail-image-box">
-          <img id="detail-image" class="detail-image" src="" alt="Project Image">
-        </div>
-
-        <!-- 2. 기사 본문 영역 (드롭캡 및 본문 서체 적용) -->
-        <div id="detail-summary" class="detail-summary">
-          Article content loading...
-        </div>
-      </article>
-
-      <!-- 3. 이전글 / 다음글 동적 네비게이션 (Gazette Navigation) -->
-      <nav class="article-nav-section">
-        <h3 class="nav-section-title">📰 GAZETTE NAVIGATION</h3>
-        <div class="article-nav-grid">
-          <div id="prev-article-box" class="nav-box">
-            <!-- js/detail.js 에서 이전글 동적 생성 -->
-          </div>
-          <div id="next-article-box" class="nav-box">
-            <!-- js/detail.js 에서 다음글 동적 생성 -->
-          </div>
-        </div>
-      </nav>
-      
-      <!-- 4. 연관 프로젝트 추천 (More From Archive) -->
-      <section class="related-section">
-        <h3 class="related-section-title">🔍 MORE FROM THIS ARCHIVE</h3>
-        <div id="related-projects-grid" class="related-grid">
-          <!-- js/detail.js 에서 연관 아티클 동적 생성 -->
+      <!-- 연관 프로젝트 추천 영역 -->
+      <section id="related-section" class="related-section">
+        <div class="related-section-title">RELATED ARTICLES</div>
+        <div id="related-grid" class="related-grid">
         </div>
       </section>
+
       <!-- 💬 Giscus 댓글 섹션 -->
-      <section class="gazette-comments-section" style="margin-top: 3rem; border-top: 2px solid #1a1a1a; padding-top: 1.5rem;">
-        
-        <div class="giscus"></div>
+      <section class="gazette-comments-section">
         <script src="https://giscus.app/client.js"
-          data-repo="doilob/Portfolio.D"
-          data-repo-id="R_kgDOL_L4Qg"
-          data-category="Show and tell"
-          data-category-id="DIC_kwDOL_L4Qs4DGYtq"
-          data-mapping="url"
-          data-strict="1"
-          data-reactions-enabled="1"
-          data-emit-metadata="0"
-          data-input-position="bottom"
-          data-theme="noborder_light"
-          data-lang="ko"
-          crossorigin="anonymous"
-          async>
-      </script>
+                data-repo="본인계정/저장소이름"
+                data-repo-id="R_kgDO..."
+                data-category="Announcements"
+                data-category-id="DIC_kwDO..."
+                data-mapping="pathname"
+                data-strict="0"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="bottom"
+                data-theme="preferred_color_scheme"
+                data-lang="ko"
+                crossorigin="anonymous"
+                async>
+        </script>
       </section>
     </main>
 
+    <!-- 푸터 -->
     <footer class="gazette-footer">
       <p>© THE PORTFOLIO GAZETTE — ALL RIGHTS RESERVED.</p>
     </footer>
   </div>
-<!-- 기존 각 페이지 전용 JS 앞에 테마 스크립트 연결 -->
+
+  <!-- 공통 및 전역 스크립트 연결 -->
   <script src="js/theme.js"></script>
-  <script src="js/auth-guard.js"></script> <!-- 👈 상단 보안 위젯 스크립트 추가 -->
+  <script src="js/auth-guard.js"></script>
   <script src="js/detail.js"></script>
 </body>
 </html>
