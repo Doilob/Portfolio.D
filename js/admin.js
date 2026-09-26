@@ -1,24 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
   let projectsCache = [];
 
-  // 전역 인증 상태 변경 이벤트 리스너 등록
-  window.GazetteAuth.onAuthChange = () => {
-    fetchCloudProjects();
-  };
+  // 전역 인증 상태 변경 시 목록 재갱신
+  if (window.GazetteAuth) {
+    window.GazetteAuth.onAuthChange = () => {
+      fetchCloudProjects();
+    };
+  }
 
   function isAuthorized() {
-    return window.GazetteAuth.isAuthorized();
+    return window.GazetteAuth && window.GazetteAuth.isAuthorized();
   }
 
   function getGistId() {
-    return window.GazetteAuth.getGistId();
+    return window.GazetteAuth ? window.GazetteAuth.getGistId() : "";
   }
 
   function getToken() {
-    return window.GazetteAuth.getToken();
+    return window.GazetteAuth ? window.GazetteAuth.getToken() : "";
   }
 
-  // Gist 데이터 가져오기
+  // Gist 클라우드에서 프로젝트 불러오기
   async function fetchCloudProjects() {
     if (!isAuthorized()) {
       const saved = localStorage.getItem('gazette_projects');
@@ -49,10 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAdminList();
   }
 
-  // Gist 저장하기 (미인증 시 차단)
+  // Gist 클라우드에 저장
   async function saveProjectsToCloud(projects) {
     if (!isAuthorized()) {
-      alert("🛑 [경고] 인증되지 않은 상태에서는 저장, 수정, 삭제가 완전히 불가능합니다.");
+      alert("🛑 [경고] 인증되지 않은 상태에서는 저장, 수정, 삭제가 불가능합니다. 우측 상단의 [GUEST 🔒] 배지를 클릭하여 먼저 인증해 주세요.");
       fetchCloudProjects();
       return;
     }
@@ -87,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAdminList();
   }
 
-  // 이미지 압축
+  // 이미지 압축 헬퍼
   function compressAndConvertToBase64(file, maxWidth = 800, quality = 0.8) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -120,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 관리자 목록 UI 출력
+  // 관리자 프로젝트 목록 출력
   function renderAdminList() {
     const listEl = document.getElementById('admin-projects-list');
     if (!listEl) return;
@@ -156,11 +158,21 @@ document.addEventListener('DOMContentLoaded', () => {
       listEl.appendChild(item);
     });
 
-    // DELETE 클릭 제어
+    // ✏️ EDIT 버튼 토큰 인증 가드
+    listEl.querySelectorAll('.edit-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        if (!isAuthorized()) {
+          e.preventDefault();
+          alert("🔒 수정 기능은 토큰 인증이 필요합니다. 우측 상단의 [GUEST 🔒] 배지를 클릭해 먼저 인증해 주세요.");
+        }
+      });
+    });
+
+    // 🗑 DELETE 버튼 토큰 인증 가드
     listEl.querySelectorAll('.delete-btn').forEach(btn => {
       btn.addEventListener('click', async function() {
         if (!isAuthorized()) {
-          alert("🛑 미인증 상태입니다. 우측 상단의 [GUEST 🔒] 배지를 눌러 먼저 인증해 주세요.");
+          alert("🔒 삭제 기능은 토큰 인증이 필요합니다. 우측 상단의 [GUEST 🔒] 배지를 클릭해 먼저 인증해 주세요.");
           return;
         }
 
@@ -173,14 +185,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 폼 제출 제어
+  // ➕ 신규 프로젝트 등록 제어
   const formEl = document.getElementById('project-form');
   if (formEl) {
     formEl.addEventListener('submit', async function(e) {
       e.preventDefault();
 
       if (!isAuthorized()) {
-        alert("🛑 미인증 상태입니다. 우측 상단의 [GUEST 🔒] 배지를 눌러 먼저 인증해 주세요.");
+        alert("🔒 프로젝트 추가는 토큰 인증이 필요합니다. 우측 상단의 [GUEST 🔒] 배지를 클릭해 먼저 인증해 주세요.");
         return;
       }
 
@@ -191,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
           base64Image = await compressAndConvertToBase64(fileInput.files[0]);
         } catch (err) {
-          alert('이미지 처리 오류가 발생했습니다.');
+          alert('이미지 처리 중 오류가 발생했습니다.');
         }
       }
 
@@ -210,6 +222,25 @@ document.addEventListener('DOMContentLoaded', () => {
       projectsCache.unshift(newProj);
       await saveProjectsToCloud(projectsCache);
       this.reset();
+    });
+  }
+
+  // 📦 JSON 백업 내보내기 버튼 (토큰 인증 필수)
+  const exportBtn = document.getElementById('export-json-btn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', function() {
+      if (!isAuthorized()) {
+        alert("🔒 백업 다운로드는 토큰 인증이 필요합니다. 우측 상단의 [GUEST 🔒] 배지를 클릭해 먼저 인증해 주세요.");
+        return;
+      }
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectsCache, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "projects.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
     });
   }
 
