@@ -162,3 +162,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadProjectsData();
 });
+// 📊 Daily / Total 방문자 카운터 로직
+  function trackVisitorStats() {
+    const todayStr = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+    const lastVisitDate = localStorage.getItem('gazette_last_visit_date');
+    
+    let dailyCount = parseInt(localStorage.getItem('gazette_daily_views') || '0', 10);
+    let totalCount = parseInt(localStorage.getItem('gazette_total_views') || '0', 10);
+
+    // 날짜가 변경되었으면 오늘 방문자 수 0으로 초기화
+    if (lastVisitDate !== todayStr) {
+      dailyCount = 0;
+      localStorage.setItem('gazette_last_visit_date', todayStr);
+    }
+
+    // 이번 세션에서 오늘 처음 방문한 경우 카운트 +1
+    if (!sessionStorage.getItem('gazette_counted_session')) {
+      dailyCount += 1;
+      totalCount += 1;
+      
+      localStorage.setItem('gazette_daily_views', dailyCount);
+      localStorage.setItem('gazette_total_views', totalCount);
+      sessionStorage.setItem('gazette_counted_session', 'true');
+    }
+
+    // UI에 반영
+    const dailyEl = document.getElementById('stat-daily');
+    const totalEl = document.getElementById('stat-total');
+
+    if (dailyEl) dailyEl.innerText = dailyCount.toLocaleString();
+    if (totalEl) totalEl.innerText = totalCount.toLocaleString();
+  }
+
+  // 페이지 데이터 로드 시 방문자 카운터 실행
+  trackVisitorStats();
